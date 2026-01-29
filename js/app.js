@@ -931,6 +931,9 @@ function renderInstitutionList() {
 
         listContainer.appendChild(item);
     });
+
+    // 전체 선택 체크박스 상태 업데이트
+    updateSelectAllCheckbox();
 }
 
 // 금융기관 선택 토글
@@ -947,6 +950,33 @@ function toggleInstitution(institutionId) {
 
     // 목록 다시 렌더링
     renderInstitutionList();
+
+    // 전체 선택 체크박스 상태 업데이트
+    updateSelectAllCheckbox();
+}
+
+// 전체 선택 토글
+function toggleAllInstitutions() {
+    const selectAllCheckbox = document.getElementById('selectAllInstitutions');
+
+    if (selectAllCheckbox.checked) {
+        // 모든 금융기관 선택
+        selectedInstitutions = mockInstitutions.map(inst => inst.id);
+    } else {
+        // 모든 선택 해제
+        selectedInstitutions = [];
+    }
+
+    // 목록 다시 렌더링
+    renderInstitutionList();
+}
+
+// 전체 선택 체크박스 상태 업데이트
+function updateSelectAllCheckbox() {
+    const selectAllCheckbox = document.getElementById('selectAllInstitutions');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = selectedInstitutions.length === mockInstitutions.length;
+    }
 }
 
 // Step 3: 로딩 시작

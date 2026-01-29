@@ -1176,6 +1176,23 @@ nav button:hover {
 }
 
 /* 금융기관 목록 */
+.institution-select-all {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.select-all-label {
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
 .institution-list {
     display: grid;
     gap: 12px;
