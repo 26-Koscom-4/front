@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개미 마을 - Ant Village</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header>
+        <div class="container">
+            <div class="logo">개미 마을</div>
+            <nav>
+                <button onclick="showPage('main')">홈</button>
+                <button onclick="showPage('villages')">마을 관리</button>
+                <button onclick="showPage('briefing')">아침 브리핑</button>
+                <button onclick="showPage('neighbors')">이웃 개미</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 페이지 -->
+    <div id="mainPage" class="page active">
+        <div class="hero">
+            <h1>개미 마을</h1>
+            <p>"방치된 내 주식, 개미 마을이 깨워줍니다."</p>
+            <button class="cta-button" onclick="showPage('villages')">내 마을 시작하기 🚀</button>
+        </div>
+
+        <div class="world-map">
+            <h2 style="text-align: center; margin-bottom: 30px; color: var(--dark);">전 세계 나의 투자 마을</h2>
+            <svg viewBox="0 0 800 400" style="width: 100%; height: auto;">
+                <!-- 간단한 세계 지도 표현 -->
+                <g id="korea" class="map-region" onclick="showVillageDetail('미장마을')">
+                    <circle cx="650" cy="150" r="30" fill="#FF6B35" opacity="0.8"/>
+                    <text x="650" y="155" text-anchor="middle" fill="white" font-size="14" font-weight="bold">한국</text>
+                </g>
+                <g id="usa" class="map-region" onclick="showVillageDetail('미장마을')">
+                    <circle cx="200" cy="180" r="40" fill="#F7931E" opacity="0.8"/>
+                    <text x="200" y="185" text-anchor="middle" fill="white" font-size="16" font-weight="bold">미국</text>
+                </g>
+                <g id="europe" class="map-region" onclick="showVillageDetail('배당마을')">
+                    <circle cx="420" cy="140" r="25" fill="#4ECDC4" opacity="0.8"/>
+                    <text x="420" y="145" text-anchor="middle" fill="white" font-size="12" font-weight="bold">유럽</text>
+                </g>
+                <g id="asia" class="map-region" onclick="showVillageDetail('신흥국마을')">
+                    <circle cx="600" cy="220" r="28" fill="#FFD23F" opacity="0.8"/>
+                    <text x="600" y="225" text-anchor="middle" fill="white" font-size="13" font-weight="bold">아시아</text>
+                </g>
+            </svg>
+        </div>
+    </div>
+
+    <!-- 마을 관리 페이지 -->
+    <div id="villagesPage" class="page">
+        <div class="container">
+            <h1 class="page-title">나의 마을 관리</h1>
+            <p class="page-subtitle">내 자산을 성격에 따라 마을로 분리하세요</p>
+
+            <div class="village-grid" id="villageGrid">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 아침 브리핑 페이지 -->
+    <div id="briefingPage" class="page">
+        <div class="container">
+            <h1 class="page-title">개미 아침 브리핑</h1>
+            <p class="page-subtitle">눈으로 보지 말고, 귀로 듣는 출근길 투자 전략</p>
+
+            <div class="briefing-container">
+                <div class="ant-character">
+                    <div class="ant-avatar">🐜</div>
+                    <div class="ant-name">브리핑 개미</div>
+                </div>
+
+                <div class="briefing-content" id="briefingContent">
+                    <div class="briefing-section">
+                        <h3>📊 전일 시장 요약</h3>
+                        <p>주인님, 좋은 아침입니다! 어제 미국 증시는 혼조세를 보였습니다.</p>
+                        <p>S&P 500 지수는 0.3% 상승한 4,785포인트로 마감했으며, 나스닥은 0.5% 상승했습니다.</p>
+                    </div>
+
+                    <div class="briefing-section">
+                        <h3>🎯 내 포트폴리오 핵심 이슈</h3>
+                        <p><strong>미장마을</strong> - NVDA가 3.2% 상승했습니다. AI 칩 수요 증가 전망이 긍정적입니다.</p>
+                        <p><strong>미장마을</strong> - AAPL은 1.5% 하락했습니다. 아이폰 판매량 우려가 반영되었습니다.</p>
+                        <p><strong>배당마을</strong> - SCHD는 보합세를 유지했습니다. 안정적인 배당 수익 유지 중입니다.</p>
+                    </div>
+
+                    <div class="briefing-section">
+                        <h3>📅 금일 주요 일정</h3>
+                        <p>• 오전 10시: 미국 소비자물가지수(CPI) 발표 예정</p>
+                        <p>• 오후 3시: 연준 의장 제롬 파월 연설</p>
+                        <p>• 장마감 후: 테슬라(TSLA) 실적 발표</p>
+                    </div>
+                </div>
+
+                <div class="audio-controls">
+                    <button class="audio-button" onclick="playBriefing()">🔊 음성으로 듣기</button>
+                    <button class="audio-button" onclick="stopBriefing()">⏹️ 정지</button>
+                    <button class="audio-button" onclick="showPage('villages')">마을로 돌아가기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 마을별 정기 브리핑 페이지 -->
+    <div id="dailyBriefingPage" class="page">
+        <div class="container">
+            <h1 class="page-title">마을별 정기 브리핑</h1>
+            <p class="page-subtitle">시간대별 맞춤 정보 제공</p>
+
+            <div class="briefing-container">
+                <div class="ant-character">
+                    <div class="ant-avatar">🏘️</div>
+                    <div class="ant-name" id="dailyVillageName">미장마을</div>
+                </div>
+
+                <div class="briefing-content" id="dailyBriefingContent">
+                    <div class="briefing-section">
+                        <h3>🌅 장전 브리핑 (오전 8시)</h3>
+                        <p>미장마을의 오늘 전망입니다.</p>
+                        <p>선물 지수는 +0.5% 상승 중이며, 긍정적인 출발이 예상됩니다.</p>
+                    </div>
+
+                    <div class="briefing-section">
+                        <h3>⚡ 레버리지마을 특별 경고</h3>
+                        <p style="color: var(--danger); font-weight: 700;">변동성 지수(VIX)가 18.5로 상승했습니다.</p>
+                        <p>레버리지 포지션 점검을 권장드립니다.</p>
+                    </div>
+
+                    <div class="briefing-section">
+                        <h3>💰 배당마을 D-Day 알림</h3>
+                        <p>SCHD 배당락일까지 <strong>3일</strong> 남았습니다.</p>
+                        <p>예상 배당 수익: $127.50</p>
+                    </div>
+                </div>
+
+                <div class="audio-controls">
+                    <button class="audio-button" onclick="playDailyBriefing()">🔊 음성으로 듣기</button>
+                    <button class="audio-button" onclick="showPage('main')">메인으로 돌아가기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 이웃 개미 놀러오기 페이지 -->
+    <div id="neighborsPage" class="page">
+        <div class="container">
+            <h1 class="page-title">이웃 개미 놀러오기</h1>
+            <p class="page-subtitle">내 포트폴리오의 빈틈을 채워줄 이웃 마을 추천</p>
+
+            <div class="recommendation-grid">
+                <!-- 원자재 마을 -->
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <div class="rec-icon">🏆</div>
+                        <div>
+                            <div class="rec-title">원자재 마을</div>
+                            <div class="rec-subtitle">금, 은, 원유 ETF</div>
+                        </div>
+                    </div>
+
+                    <div class="rec-description">
+                        <strong>추천 이유:</strong> 현재 포트폴리오가 기술주에 집중되어 있습니다.
+                        원자재는 인플레이션 헷지와 포트폴리오 다각화에 효과적입니다.
+                        <br><br>
+                        <strong>주요 자산:</strong> GLD (금 ETF), SLV (은 ETF), USO (원유 ETF)
+                    </div>
+
+                    <div class="correlation-box">
+                        <div style="font-size: 14px; margin-bottom: 5px;">기존 포트폴리오와의 상관관계</div>
+                        <div class="correlation-value">-0.23</div>
+                        <div style="font-size: 12px; margin-top: 5px;">낮은 상관관계 = 분산 효과 우수</div>
+                    </div>
+
+                    <button class="add-village-btn" onclick="addVillage('원자재 마을')">마을 추가하기</button>
+                </div>
+
+                <!-- 신흥국 마을 -->
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <div class="rec-icon">🌏</div>
+                        <div>
+                            <div class="rec-title">신흥국 마을</div>
+                            <div class="rec-subtitle">인도, 베트남, 브라질</div>
+                        </div>
+                    </div>
+
+                    <div class="rec-description">
+                        <strong>추천 이유:</strong> 미국 시장 편중도가 높습니다.
+                        신흥국은 높은 성장 잠재력과 지리적 다각화를 제공합니다.
+                        <br><br>
+                        <strong>주요 자산:</strong> EPI (인도), VNM (베트남), EWZ (브라질)
+                    </div>
+
+                    <div class="correlation-box">
+                        <div style="font-size: 14px; margin-bottom: 5px;">기존 포트폴리오와의 상관관계</div>
+                        <div class="correlation-value">-0.15</div>
+                        <div style="font-size: 12px; margin-top: 5px;">지리적 분산 효과</div>
+                    </div>
+
+                    <button class="add-village-btn" onclick="addVillage('신흥국 마을')">마을 추가하기</button>
+                </div>
+
+                <!-- 채권 마을 -->
+                <div class="recommendation-card">
+                    <div class="rec-header">
+                        <div class="rec-icon">🏦</div>
+                        <div>
+                            <div class="rec-title">채권 마을</div>
+                            <div class="rec-subtitle">안전자산 포트폴리오</div>
+                        </div>
+                    </div>
+
+                    <div class="rec-description">
+                        <strong>추천 이유:</strong> 주식 비중이 90% 이상입니다.
+                        채권은 하방 리스크를 줄이고 안정적인 수익을 제공합니다.
+                        <br><br>
+                        <strong>주요 자산:</strong> AGG (종합채권), TLT (장기국채), HYG (하이일드)
+                    </div>
+
+                    <div class="correlation-box">
+                        <div style="font-size: 14px; margin-bottom: 5px;">기존 포트폴리오와의 상관관계</div>
+                        <div class="correlation-value">-0.40</div>
+                        <div style="font-size: 12px; margin-top: 5px;">역상관 = 최고의 헷징 효과</div>
+                    </div>
+
+                    <button class="add-village-btn" onclick="addVillage('채권 마을')">마을 추가하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 모달 -->
+    <div id="villageModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
