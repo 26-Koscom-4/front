@@ -84,6 +84,17 @@
 
         <div class="world-map">
             <h2 style="text-align: center; margin-bottom: 30px; color: var(--dark);">전 세계 나의 투자 마을</h2>
+
+            <!-- 새로운 추천 알림 배너 -->
+            <div class="recommendation-banner" id="recommendationBanner" style="display: none;" onclick="goToRecommendations()">
+                <div class="banner-icon">✨</div>
+                <div class="banner-content">
+                    <div class="banner-title">새로운 이웃 마을 추천</div>
+                    <div class="banner-subtitle">포트폴리오를 다각화할 수 있는 마을을 추천드립니다</div>
+                </div>
+                <div class="banner-arrow">→</div>
+            </div>
+
             <div class="map-container">
                 <img src="public/map.png" alt="세계 지도" class="map-image">
 
@@ -103,6 +114,12 @@
                 <div class="map-hotspot hotspot-asia" onclick="showVillageDetail('글로벌ETF마을')" title="아시아">
                     <span class="hotspot-label">🌏 아시아</span>
                     <span class="unread-badge" id="badge-글로벌ETF마을" style="display: none;">NEW</span>
+                </div>
+
+                <!-- 추천 마을 핫스팟 -->
+                <div class="map-hotspot hotspot-recommendation" id="recommendationHotspot" style="display: none;" onclick="goToRecommendations()" title="새로운 추천">
+                    <span class="hotspot-label">✨ 추천</span>
+                    <span class="recommendation-pulse"></span>
                 </div>
             </div>
         </div>

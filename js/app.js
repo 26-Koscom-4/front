@@ -4,6 +4,11 @@ const sampleData = {
         name: "김직장",
         theme: "light"
     },
+    recommendation: {
+        hasNewRecommendation: true,
+        lastCheckedDate: null,
+        recommendedVillages: ['원자재 마을', '신흥국 마을', '채권 마을']
+    },
     villages: [
         {
             id: "v1",
@@ -184,6 +189,7 @@ function showPage(pageName) {
     } else if (pageName === 'main') {
         renderAssetChart();
         renderMapBadges();
+        renderRecommendationBanner();
     } else if (pageName === 'mypage') {
         loadMypage();
     }
@@ -523,16 +529,96 @@ function addVillage(villageName) {
         goal: "diversification",
         totalValue: 0,
         returnRate: 0,
-        allocation: 0
+        allocation: 0,
+        lastBriefingRead: null
     };
 
     data.villages.push(newVillage);
+
+    // 추천 마을을 추가한 경우, 추천 목록에서 제거
+    if (data.recommendation && data.recommendation.recommendedVillages) {
+        const index = data.recommendation.recommendedVillages.indexOf(villageName);
+        if (index > -1) {
+            data.recommendation.recommendedVillages.splice(index, 1);
+        }
+
+        // 추천 마을이 모두 추가되면 추천 상태 해제
+        if (data.recommendation.recommendedVillages.length === 0) {
+            data.recommendation.hasNewRecommendation = false;
+        }
+    }
+
     saveData(data);
+
+    // 추천 배너/핫스팟 업데이트
+    renderRecommendationBanner();
 
     // 마을 관리 페이지로 이동
     setTimeout(() => {
         showPage('villages');
     }, 1500);
+}
+
+// ========== 추천 마을 관리 ==========
+
+// 추천 배너 및 핫스팟 렌더링
+function renderRecommendationBanner() {
+    const data = loadData();
+    const banner = document.getElementById('recommendationBanner');
+    const hotspot = document.getElementById('recommendationHotspot');
+
+    if (!data.recommendation) {
+        data.recommendation = {
+            hasNewRecommendation: true,
+            lastCheckedDate: null,
+            recommendedVillages: ['원자재 마을', '신흥국 마을', '채권 마을']
+        };
+        saveData(data);
+    }
+
+    if (data.recommendation.hasNewRecommendation && data.recommendation.recommendedVillages.length > 0) {
+        // 추천이 있는 경우 배너와 핫스팟 표시
+        if (banner) banner.style.display = 'flex';
+        if (hotspot) hotspot.style.display = 'block';
+    } else {
+        // 추천이 없는 경우 숨김
+        if (banner) banner.style.display = 'none';
+        if (hotspot) hotspot.style.display = 'none';
+    }
+}
+
+// 추천 페이지로 이동
+function goToRecommendations() {
+    const data = loadData();
+
+    // 추천 확인 날짜 업데이트
+    if (data.recommendation) {
+        data.recommendation.lastCheckedDate = new Date().toISOString();
+        saveData(data);
+    }
+
+    // 이웃 개미 페이지로 이동
+    showPage('neighbors');
+
+    // 활동 기록 추가
+    addActivity('새로운 이웃 마을 추천을 확인했습니다');
+}
+
+// 추천 마을 생성 (테스트용 함수)
+function generateNewRecommendation() {
+    const data = loadData();
+
+    if (!data.recommendation) {
+        data.recommendation = {};
+    }
+
+    data.recommendation.hasNewRecommendation = true;
+    data.recommendation.recommendedVillages = ['원자재 마을', '신흥국 마을', '채권 마을'];
+
+    saveData(data);
+    renderRecommendationBanner();
+
+    alert('✨ 새로운 이웃 마을 추천이 생성되었습니다!');
 }
 
 // 자산 차트 생성
@@ -893,6 +979,7 @@ window.onload = () => {
         renderVillages();
         renderAssetChart();
         renderMapBadges();
+        renderRecommendationBanner();
     }
 };
 

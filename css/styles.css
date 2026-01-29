@@ -638,6 +638,52 @@ nav button:hover {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
+/* 추천 배너 */
+.recommendation-banner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 25px;
+    margin-bottom: 25px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: slideDown 0.5s ease-out;
+}
+
+.recommendation-banner:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(245, 87, 108, 0.4);
+}
+
+.banner-icon {
+    font-size: 32px;
+    animation: pulse 2s infinite;
+}
+
+.banner-content {
+    flex: 1;
+}
+
+.banner-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 5px;
+}
+
+.banner-subtitle {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.banner-arrow {
+    font-size: 24px;
+    color: white;
+    font-weight: 700;
+}
+
 .map-container {
     position: relative;
     width: 100%;
@@ -700,6 +746,36 @@ nav button:hover {
     top: 50%;
     right: 25%;
     background: rgba(255, 210, 63, 0.85);
+}
+
+.hotspot-recommendation {
+    bottom: 15%;
+    right: 10%;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    animation: pulse 2s infinite;
+}
+
+.recommendation-pulse {
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: 3px solid #f5576c;
+    border-radius: 25px;
+    animation: pulseBorder 2s infinite;
+    pointer-events: none;
+}
+
+@keyframes pulseBorder {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0;
+        transform: scale(1.2);
+    }
 }
 
 /* 미읽음 브리핑 뱃지 */
