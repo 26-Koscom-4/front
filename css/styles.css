@@ -148,6 +148,131 @@ nav button:hover {
     transform: translateY(-2px);
 }
 
+.logout-button {
+    background: var(--danger) !important;
+    color: white !important;
+}
+
+.logout-button:hover {
+    background: #e55a5a !important;
+}
+
+/* 로그인 페이지 */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-card {
+    background: var(--card-bg);
+    border-radius: 25px;
+    padding: 50px 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 450px;
+    animation: slideUp 0.6s ease-out;
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.login-logo-image {
+    height: 80px;
+    width: auto;
+    object-fit: contain;
+    animation: bounce 2s infinite;
+}
+
+.login-title {
+    font-family: 'Gowun Batang', serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.login-subtitle {
+    font-size: 16px;
+    color: var(--text-light);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.login-input {
+    padding: 15px 18px;
+    border: 2px solid var(--input-border);
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--card-bg);
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(255, 107, 53, 0.1);
+}
+
+.login-input::placeholder {
+    color: var(--text-light);
+}
+
+.login-button {
+    margin-top: 10px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 18px 35px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+}
+
+.login-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+}
+
+.login-button:active {
+    transform: translateY(-1px);
+}
+
+.login-footer {
+    margin-top: 30px;
+    text-align: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--light);
+}
+
 /* 메인 페이지 */
 .hero {
     text-align: center;

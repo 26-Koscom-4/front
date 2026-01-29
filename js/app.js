@@ -156,8 +156,11 @@ function saveData(data) {
 
 // 페이지 전환
 function showPage(pageName) {
-    document.querySelectorAll('.page').forEach(page => {
+    // 로그인 페이지는 제외하고 전환
+    const pages = document.querySelectorAll('.page:not(#loginPage)');
+    pages.forEach(page => {
         page.classList.remove('active');
+        page.style.display = 'none';
     });
 
     const pageMap = {
@@ -169,7 +172,11 @@ function showPage(pageName) {
         'mypage': 'mypagePage'
     };
 
-    document.getElementById(pageMap[pageName]).classList.add('active');
+    const targetPage = document.getElementById(pageMap[pageName]);
+    if (targetPage) {
+        targetPage.classList.add('active');
+        targetPage.style.display = 'block';
+    }
 
     // 페이지별 초기화
     if (pageName === 'villages') {
@@ -783,15 +790,110 @@ function addActivity(title) {
     }
 }
 
+// ========== 로그인 관리 ==========
+
+// 로그인 상태 확인
+function checkLoginStatus() {
+    const isLoggedIn = localStorage.getItem('isLoggedIn');
+    const userId = localStorage.getItem('userId');
+
+    if (isLoggedIn === 'true' && userId) {
+        // 로그인된 상태
+        showMainApp();
+        return true;
+    } else {
+        // 로그인되지 않은 상태
+        showLoginPage();
+        return false;
+    }
+}
+
+// 로그인 페이지 표시
+function showLoginPage() {
+    document.getElementById('loginPage').classList.add('active');
+    document.getElementById('loginPage').style.display = 'block';
+    document.getElementById('mainHeader').style.display = 'none';
+
+    // 다른 모든 페이지 숨기기
+    const pages = ['mainPage', 'villagesPage', 'briefingPage', 'dailyBriefingPage', 'neighborsPage', 'mypagePage'];
+    pages.forEach(pageId => {
+        const page = document.getElementById(pageId);
+        if (page) {
+            page.classList.remove('active');
+            page.style.display = 'none';
+        }
+    });
+}
+
+// 메인 앱 표시
+function showMainApp() {
+    document.getElementById('loginPage').classList.remove('active');
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainHeader').style.display = 'block';
+
+    // 메인 페이지로 이동
+    showPage('main');
+}
+
+// 로그인 처리
+function handleLogin(event) {
+    event.preventDefault();
+
+    const userId = document.getElementById('loginId').value.trim();
+    const userPw = document.getElementById('loginPw').value.trim();
+
+    // 공백 체크
+    if (!userId || !userPw) {
+        alert('⚠️ 아이디와 비밀번호를 입력해주세요.');
+        return;
+    }
+
+    // 로그인 성공 처리
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('userId', userId);
+
+    // 입력 필드 초기화
+    document.getElementById('loginId').value = '';
+    document.getElementById('loginPw').value = '';
+
+    // 메인 앱 표시
+    showMainApp();
+
+    // 환영 메시지
+    setTimeout(() => {
+        alert(`✅ 환영합니다, ${userId}님!`);
+    }, 300);
+}
+
+// 로그아웃 처리
+function logout() {
+    const confirmed = confirm('로그아웃 하시겠습니까?');
+
+    if (confirmed) {
+        localStorage.removeItem('isLoggedIn');
+        localStorage.removeItem('userId');
+
+        // 로그인 페이지로 이동
+        showLoginPage();
+
+        alert('로그아웃되었습니다.');
+    }
+}
+
 // 초기 로드
 window.onload = () => {
-    // 저장된 테마 적용
-    const data = loadData();
-    applyTheme(data.user_profile.theme || 'light');
+    // 로그인 상태 확인
+    const isLoggedIn = checkLoginStatus();
 
-    renderVillages();
-    renderAssetChart();
-    renderMapBadges();
+    if (isLoggedIn) {
+        // 저장된 테마 적용
+        const data = loadData();
+        applyTheme(data.user_profile.theme || 'light');
+
+        renderVillages();
+        renderAssetChart();
+        renderMapBadges();
+    }
 };
 
 // 모달 외부 클릭 시 닫기
