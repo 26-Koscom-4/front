@@ -684,6 +684,9 @@ function loadMypage() {
 
     // 통계 정보 계산 및 표시
     updateStatistics(data);
+
+    // 자산 연동 상태 업데이트
+    updateIntegrationStatus();
 }
 
 // 통계 정보 업데이트
@@ -822,8 +825,17 @@ let selectedInstitutions = [];
 
 // 마이데이터 연동 시작
 function startMyDataIntegration() {
+    const data = loadData();
+
     // 모달 열기
     document.getElementById('mydataModal').classList.add('active');
+
+    // 이미 연동된 경우 이전에 선택했던 금융기관을 자동으로 선택
+    if (data.mydata_integration && data.mydata_integration.is_integrated) {
+        selectedInstitutions = data.mydata_integration.integrated_institutions.map(inst => inst.id);
+    } else {
+        selectedInstitutions = [];
+    }
 
     // Step 1으로 초기화
     showMydataStep(1);
@@ -855,6 +867,27 @@ function showMydataStep(step) {
     // Step 2일 경우 금융기관 목록 렌더링
     if (step === 2) {
         renderInstitutionList();
+
+        // 헤더 텍스트 업데이트 (최신화인 경우)
+        const data = loadData();
+        const headerTitle = document.querySelector('#mydataStep2 .mydata-header h2');
+        const headerSubtitle = document.querySelector('#mydataStep2 .mydata-header p');
+
+        if (data.mydata_integration && data.mydata_integration.is_integrated) {
+            if (headerTitle) {
+                headerTitle.innerHTML = '<span style="color: var(--primary);">🔄 자산 정보 최신화</span>';
+            }
+            if (headerSubtitle) {
+                headerSubtitle.textContent = '최신화할 금융기관을 선택하세요 (이전 선택 자동 체크됨)';
+            }
+        } else {
+            if (headerTitle) {
+                headerTitle.innerHTML = '<span style="color: var(--primary);">📋 연동할 자산 선택</span>';
+            }
+            if (headerSubtitle) {
+                headerSubtitle.textContent = '연동하려는 금융기관을 선택하세요';
+            }
+        }
     }
 }
 
@@ -1059,19 +1092,105 @@ function showCompletionStep() {
 
 // 연동 완료
 function finishIntegration() {
+    const data = loadData();
+
+    // 연동 이력 저장
+    if (!data.mydata_integration) {
+        data.mydata_integration = {};
+    }
+
+    data.mydata_integration.is_integrated = true;
+    data.mydata_integration.last_integration_date = new Date().toISOString();
+    data.mydata_integration.integrated_institutions = selectedInstitutions.map(id => {
+        const inst = mockInstitutions.find(i => i.id === id);
+        return { id: inst.id, name: inst.name, icon: inst.icon };
+    });
+    data.mydata_integration.integration_count = (data.mydata_integration.integration_count || 0) + 1;
+
+    saveData(data);
+
     // 활동 기록 추가
-    addActivity(`마이데이터를 통해 ${selectedInstitutions.length}개 금융기관 연동 완료`);
+    const actionText = data.mydata_integration.integration_count === 1
+        ? `마이데이터를 통해 ${selectedInstitutions.length}개 금융기관 연동 완료`
+        : `마이데이터 자산 정보 최신화 완료 (${selectedInstitutions.length}개 기관)`;
+    addActivity(actionText);
 
     // 모달 닫기
     closeMydataModal();
 
     // 성공 메시지
-    alert('✅ 자산 연동이 완료되었습니다! 이제 마을 관리 페이지에서 자산을 확인하세요.');
+    const message = data.mydata_integration.integration_count === 1
+        ? '✅ 자산 연동이 완료되었습니다! 이제 마을 관리 페이지에서 자산을 확인하세요.'
+        : '✅ 자산 정보가 최신화되었습니다!';
+    alert(message);
 
     // 통계 업데이트
-    const data = loadData();
     updateStatistics(data);
+
+    // 자산 연동 상태 UI 업데이트
+    updateIntegrationStatus();
 
     // 선택 초기화
     selectedInstitutions = [];
+}
+
+// 자산 연동 상태 UI 업데이트
+function updateIntegrationStatus() {
+    const data = loadData();
+    const integrationButton = document.getElementById('integrationButton');
+    const integrationButtonText = document.getElementById('integrationButtonText');
+    const integrationIcon = document.getElementById('integrationIcon');
+    const integrationDescription = document.getElementById('integrationDescription');
+
+    if (!integrationButton || !integrationButtonText || !integrationIcon || !integrationDescription) {
+        return;
+    }
+
+    if (data.mydata_integration && data.mydata_integration.is_integrated) {
+        // 이미 연동된 경우
+        const lastDate = new Date(data.mydata_integration.last_integration_date);
+        const dateString = lastDate.toLocaleDateString('ko-KR', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        const institutionCount = data.mydata_integration.integrated_institutions.length;
+        const institutionNames = data.mydata_integration.integrated_institutions
+            .map(inst => inst.name)
+            .join(', ');
+
+        integrationDescription.innerHTML = `
+            <div style="padding: 15px; background: linear-gradient(135deg, var(--stat-bg-start) 0%, var(--stat-bg-end) 100%); border-radius: 12px; margin-bottom: 10px;">
+                <p style="font-weight: 600; color: var(--success); margin-bottom: 8px;">
+                    ✅ 연동 완료 (${institutionCount}개 금융기관)
+                </p>
+                <p style="font-size: 14px; color: var(--text); margin-bottom: 5px;">
+                    ${institutionNames}
+                </p>
+                <p style="font-size: 12px; color: var(--text-light);">
+                    마지막 연동: ${dateString}
+                </p>
+            </div>
+            <p style="font-size: 14px; color: var(--text-light);">
+                자산 정보를 최신 상태로 유지하려면 주기적으로 최신화하세요.
+            </p>
+        `;
+
+        integrationButtonText.textContent = '자산 정보 최신화하기';
+        integrationIcon.textContent = '🔄';
+        integrationButton.style.background = 'linear-gradient(135deg, var(--success), #3db8af)';
+    } else {
+        // 아직 연동하지 않은 경우
+        integrationDescription.innerHTML = `
+            <p>마이데이터를 통해 보유 중인 자산을 자동으로 연동하고 최신 정보를 받아보세요.</p>
+            <p style="font-size: 14px; color: var(--text-light); margin-top: 8px;">
+                📱 증권사, 은행 계좌 정보를 안전하게 가져올 수 있습니다.
+            </p>
+        `;
+
+        integrationButtonText.textContent = '자산 연동 시작하기';
+        integrationIcon.textContent = '🔄';
+        integrationButton.style.background = 'linear-gradient(135deg, var(--primary), var(--secondary))';
+    }
 }
