@@ -19,7 +19,8 @@ const sampleData = {
             goal: "long-term",
             totalValue: 15000000,
             returnRate: 12.5,
-            allocation: 32.3
+            allocation: 32.3,
+            lastBriefingRead: null
         },
         {
             id: "v2",
@@ -34,7 +35,8 @@ const sampleData = {
             goal: "passive-income",
             totalValue: 8000000,
             returnRate: 8.3,
-            allocation: 17.2
+            allocation: 17.2,
+            lastBriefingRead: null
         },
         {
             id: "v3",
@@ -49,7 +51,8 @@ const sampleData = {
             goal: "high-risk",
             totalValue: 5000000,
             returnRate: -5.2,
-            allocation: 10.8
+            allocation: 10.8,
+            lastBriefingRead: null
         },
         {
             id: "v4",
@@ -64,7 +67,8 @@ const sampleData = {
             goal: "balanced",
             totalValue: 5000000,
             returnRate: 6.8,
-            allocation: 10.8
+            allocation: 10.8,
+            lastBriefingRead: null
         },
         {
             id: "v5",
@@ -79,7 +83,8 @@ const sampleData = {
             goal: "diversification",
             totalValue: 7500000,
             returnRate: 9.2,
-            allocation: 16.1
+            allocation: 16.1,
+            lastBriefingRead: null
         },
         {
             id: "v6",
@@ -94,7 +99,8 @@ const sampleData = {
             goal: "sector-focus",
             totalValue: 6000000,
             returnRate: 15.3,
-            allocation: 12.9
+            allocation: 12.9,
+            lastBriefingRead: null
         }
     ],
     settings: {
@@ -170,6 +176,7 @@ function showPage(pageName) {
         renderVillages();
     } else if (pageName === 'main') {
         renderAssetChart();
+        renderMapBadges();
     } else if (pageName === 'mypage') {
         loadMypage();
     }
@@ -354,11 +361,67 @@ function goToVillage(villageName) {
             </div>
         `;
 
+        // 브리핑 읽음 처리
+        markBriefingAsRead(villageName);
+
         // 마을별 정기 브리핑 페이지로 이동
         showPage('daily');
     } else {
         alert('해당 마을을 찾을 수 없습니다.');
     }
+}
+
+// 브리핑 읽음 처리
+function markBriefingAsRead(villageName) {
+    const data = loadData();
+    const village = data.villages.find(v => v.name === villageName);
+
+    if (village) {
+        // 오늘 날짜를 저장
+        village.lastBriefingRead = new Date().toISOString().split('T')[0];
+        saveData(data);
+
+        // 뱃지 업데이트
+        renderMapBadges();
+    }
+}
+
+// 브리핑 읽음 여부 체크 (오늘 날짜 기준)
+function isBriefingUnread(village) {
+    if (!village.lastBriefingRead) {
+        return true; // 한 번도 읽지 않음
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+    return village.lastBriefingRead !== today; // 오늘 읽지 않았으면 미읽음
+}
+
+// 지도 뱃지 렌더링
+function renderMapBadges() {
+    const data = loadData();
+
+    // 마을 이름과 뱃지 ID 매핑
+    const villageBadgeMap = {
+        '국장마을': 'badge-국장마을',
+        '미장마을': 'badge-미장마을',
+        '배당마을': 'badge-배당마을',
+        '글로벌ETF마을': 'badge-글로벌ETF마을'
+    };
+
+    // 각 마을의 읽음 상태 확인
+    data.villages.forEach(village => {
+        const badgeId = villageBadgeMap[village.name];
+        if (badgeId) {
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                if (isBriefingUnread(village)) {
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+    });
 }
 
 // 마을 유형 텍스트 변환
@@ -725,6 +788,7 @@ window.onload = () => {
 
     renderVillages();
     renderAssetChart();
+    renderMapBadges();
 };
 
 // 모달 외부 클릭 시 닫기
