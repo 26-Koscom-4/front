@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-AMIs (캐미s) - Ant Village</title>
     <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -48,6 +49,29 @@
                 </div>
                 <div class="map-hotspot hotspot-asia" onclick="showVillageDetail('신흥국마을')" title="아시아">
                     <span class="hotspot-label">🌏 아시아</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 자산 분포 차트 -->
+        <div class="asset-chart-section">
+            <div class="container">
+                <h2 class="section-title">내 자산 분포</h2>
+                <p class="section-subtitle">마을별 자산 비중을 한눈에 확인하세요</p>
+
+                <div class="chart-wrapper">
+                    <div class="chart-container">
+                        <canvas id="assetPieChart"></canvas>
+                    </div>
+
+                    <div class="chart-legend">
+                        <h3>총 자산</h3>
+                        <div class="total-assets" id="totalAssets">0원</div>
+
+                        <div class="legend-items" id="legendItems">
+                            <!-- JavaScript로 동적 생성 -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

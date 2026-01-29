@@ -457,6 +457,22 @@ nav button:hover {
     opacity: 0.9;
 }
 
+/* 공통 섹션 타이틀 */
+.section-title {
+    text-align: center;
+    color: var(--dark);
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.section-subtitle {
+    text-align: center;
+    color: var(--text-light);
+    font-size: 16px;
+    margin-bottom: 30px;
+}
+
 /* 세계 지도 (이미지 기반) */
 .world-map {
     max-width: 900px;
@@ -529,6 +545,109 @@ nav button:hover {
     top: 50%;
     right: 25%;
     background: rgba(255, 210, 63, 0.85);
+}
+
+/* 자산 차트 섹션 */
+.asset-chart-section {
+    max-width: 1000px;
+    margin: 60px auto;
+    background: white;
+    padding: 50px 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.chart-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.chart-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.chart-legend {
+    padding: 20px;
+}
+
+.chart-legend h3 {
+    font-size: 18px;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.total-assets {
+    font-size: 42px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 30px;
+}
+
+.legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    background: var(--light);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.legend-item:hover {
+    background: #e0e0e0;
+    transform: translateX(5px);
+}
+
+.legend-item-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.legend-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.legend-icon {
+    font-size: 24px;
+}
+
+.legend-item-right {
+    text-align: right;
+}
+
+.legend-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.legend-percentage {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 2px;
 }
 
 /* 모달 */
@@ -621,6 +740,25 @@ nav button:hover {
     header .container {
         flex-direction: column;
         gap: 15px;
+    }
+
+    /* 모바일에서 차트 레이아웃 */
+    .asset-chart-section {
+        padding: 30px 20px;
+        margin: 40px auto;
+    }
+
+    .chart-wrapper {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+
+    .total-assets {
+        font-size: 32px;
+    }
+
+    .section-title {
+        font-size: 24px;
     }
 }
 
