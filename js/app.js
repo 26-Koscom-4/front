@@ -159,7 +159,8 @@ function showPage(pageName) {
         'villages': 'villagesPage',
         'briefing': 'briefingPage',
         'daily': 'dailyBriefingPage',
-        'neighbors': 'neighborsPage'
+        'neighbors': 'neighborsPage',
+        'mypage': 'mypagePage'
     };
 
     document.getElementById(pageMap[pageName]).classList.add('active');
@@ -169,6 +170,8 @@ function showPage(pageName) {
         renderVillages();
     } else if (pageName === 'main') {
         renderAssetChart();
+    } else if (pageName === 'mypage') {
+        loadMypage();
     }
 }
 
@@ -450,8 +453,128 @@ function renderAssetChart() {
     });
 }
 
+// 마이페이지 로드
+function loadMypage() {
+    const data = loadData();
+
+    // 프로필 정보 로드
+    document.getElementById('userName').value = data.user_profile.name || '';
+    document.getElementById('userTheme').value = data.user_profile.theme || 'light';
+
+    // 설정 정보 로드
+    document.getElementById('briefingTime').value = data.settings.briefing_time || '08:00';
+    document.getElementById('voiceSpeed').value = data.settings.voice_speed || 1.0;
+    document.getElementById('voiceSpeedValue').textContent = (data.settings.voice_speed || 1.0) + 'x';
+
+    // 음성 속도 슬라이더 이벤트
+    document.getElementById('voiceSpeed').addEventListener('input', function() {
+        document.getElementById('voiceSpeedValue').textContent = this.value + 'x';
+    });
+
+    // 통계 정보 계산 및 표시
+    updateStatistics(data);
+}
+
+// 통계 정보 업데이트
+function updateStatistics(data) {
+    // 총 자산
+    const totalAssets = data.villages.reduce((sum, v) => sum + v.totalValue, 0);
+    document.getElementById('statTotalAssets').textContent = totalAssets.toLocaleString() + '원';
+
+    // 마을 수
+    document.getElementById('statVillageCount').textContent = data.villages.length + '개';
+
+    // 평균 수익률
+    const avgReturn = data.villages.reduce((sum, v) => sum + v.returnRate, 0) / data.villages.length;
+    const avgReturnFormatted = avgReturn >= 0 ? '+' + avgReturn.toFixed(1) : avgReturn.toFixed(1);
+    document.getElementById('statAvgReturn').textContent = avgReturnFormatted + '%';
+    document.getElementById('statAvgReturn').style.color = avgReturn >= 0 ? 'var(--success)' : 'var(--danger)';
+
+    // 보유 자산 수
+    let totalAssetCount = 0;
+    data.villages.forEach(village => {
+        totalAssetCount += village.assets.length;
+    });
+    document.getElementById('statAssetCount').textContent = totalAssetCount + '개';
+}
+
+// 프로필 저장
+function saveProfile() {
+    const data = loadData();
+
+    data.user_profile.name = document.getElementById('userName').value;
+    data.user_profile.theme = document.getElementById('userTheme').value;
+
+    saveData(data);
+
+    // 테마 적용
+    applyTheme(data.user_profile.theme);
+
+    // 성공 메시지
+    alert('프로필이 저장되었습니다! ✅');
+
+    // 활동 기록 추가
+    addActivity('프로필 정보를 업데이트했습니다.');
+}
+
+// 테마 적용 함수
+function applyTheme(theme) {
+    if (theme === 'dark') {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
+}
+
+// 설정 저장
+function saveSettings() {
+    const data = loadData();
+
+    data.settings.briefing_time = document.getElementById('briefingTime').value;
+    data.settings.voice_speed = parseFloat(document.getElementById('voiceSpeed').value);
+
+    saveData(data);
+
+    // 성공 메시지
+    alert('설정이 저장되었습니다! ✅');
+
+    // 활동 기록 추가
+    addActivity('설정을 변경했습니다.');
+}
+
+// 활동 기록 추가
+function addActivity(title) {
+    const activityList = document.getElementById('activityList');
+
+    const activityItem = document.createElement('div');
+    activityItem.className = 'activity-item fade-in';
+
+    const now = new Date();
+    const timeString = now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+    activityItem.innerHTML = `
+        <div class="activity-icon">✨</div>
+        <div class="activity-content">
+            <div class="activity-title">${title}</div>
+            <div class="activity-time">${timeString}</div>
+        </div>
+    `;
+
+    // 최상단에 추가
+    activityList.insertBefore(activityItem, activityList.firstChild);
+
+    // 활동 기록이 10개를 넘으면 오래된 것 삭제
+    if (activityList.children.length > 10) {
+        activityList.removeChild(activityList.lastChild);
+    }
+}
+
 // 초기 로드
 window.onload = () => {
+    // 저장된 테마 적용
+    const data = loadData();
+    applyTheme(data.user_profile.theme || 'light');
+
     renderVillages();
     renderAssetChart();
 };
