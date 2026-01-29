@@ -184,7 +184,7 @@ function renderVillages() {
     data.villages.forEach(village => {
         const card = document.createElement('div');
         card.className = 'village-card fade-in';
-        card.onclick = () => showPage('daily');
+        card.onclick = () => showVillageDetail(village.name);
 
         const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
         const returnSign = village.returnRate >= 0 ? '+' : '';
@@ -229,27 +229,175 @@ function showVillageDetail(villageName) {
         const modal = document.getElementById('villageModal');
         const content = document.getElementById('modalContent');
 
+        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+        const returnSign = village.returnRate >= 0 ? '+' : '';
+
         content.innerHTML = `
-            <h2 style="color: var(--primary); margin-bottom: 20px;">${village.icon} ${village.name}</h2>
-            <div style="margin: 20px 0;">
-                <h3>보유 자산</h3>
-                <div class="assets-list" style="margin-top: 15px;">
-                    ${village.assets.map(asset => `<span class="asset-tag">${typeof asset === 'string' ? asset : asset.name}</span>`).join('')}
+            <h2 style="color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 48px;">${village.icon}</span>
+                <span>${village.name}</span>
+            </h2>
+
+            <div style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, var(--stat-bg-start) 0%, var(--stat-bg-end) 100%); border-radius: 15px;">
+                <h3 style="color: var(--primary); margin-bottom: 15px;">📊 마을 현황</h3>
+                <div style="display: grid; gap: 10px;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-light);">총 자산</span>
+                        <span style="font-weight: 700; color: var(--dark);">${village.totalValue.toLocaleString()}원</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-light);">수익률</span>
+                        <span class="stat-value ${returnClass}" style="font-weight: 700;">${returnSign}${village.returnRate}%</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--text-light);">포트폴리오 비중</span>
+                        <span style="font-weight: 700; color: var(--dark);">${village.allocation}%</span>
+                    </div>
                 </div>
             </div>
+
             <div style="margin: 20px 0;">
-                <h3>투자 목표: ${village.goal}</h3>
-                <p>유형: ${village.type}</p>
+                <h3 style="color: var(--primary); margin-bottom: 10px;">💼 보유 자산 (${village.assets.length}개)</h3>
+                <div class="assets-list" style="margin-top: 15px;">
+                    ${village.assets.map(asset => {
+                        const assetName = typeof asset === 'string' ? asset : asset.name;
+                        return `<span class="asset-tag">${assetName}</span>`;
+                    }).join('')}
+                </div>
             </div>
-            <button class="audio-button" onclick="closeModal()">닫기</button>
+
+            <div style="margin: 20px 0; padding: 15px; background: var(--light); border-radius: 10px;">
+                <div style="margin-bottom: 8px;">
+                    <strong style="color: var(--dark);">투자 유형:</strong>
+                    <span style="color: var(--text);">${getVillageTypeText(village.type)}</span>
+                </div>
+                <div>
+                    <strong style="color: var(--dark);">투자 목표:</strong>
+                    <span style="color: var(--text);">${getVillageGoalText(village.goal)}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 25px;">
+                <button class="audio-button" onclick="goToVillageAndCloseModal('${village.name}')" style="flex: 1; background: var(--success);">
+                    🏘️ 마을로 이동
+                </button>
+                <button class="audio-button" onclick="closeModal()" style="flex: 1; background: var(--text-light);">
+                    닫기
+                </button>
+            </div>
         `;
 
         modal.classList.add('active');
+    } else {
+        alert('해당 마을을 찾을 수 없습니다.');
     }
 }
 
 function closeModal() {
     document.getElementById('villageModal').classList.remove('active');
+}
+
+// 모달을 닫고 마을로 이동
+function goToVillageAndCloseModal(villageName) {
+    closeModal();
+    setTimeout(() => {
+        goToVillage(villageName);
+    }, 300); // 모달 닫기 애니메이션 대기
+}
+
+// 마을로 이동
+function goToVillage(villageName) {
+    const data = loadData();
+    const village = data.villages.find(v => v.name === villageName);
+
+    if (village) {
+        // 마을 이름 업데이트
+        document.getElementById('dailyVillageName').textContent = village.name;
+
+        // 마을 아이콘으로 아바타 변경
+        const avatar = document.querySelector('#dailyBriefingPage .ant-avatar');
+        if (avatar) {
+            avatar.textContent = village.icon;
+        }
+
+        // 브리핑 내용 업데이트
+        const briefingContent = document.getElementById('dailyBriefingContent');
+        briefingContent.innerHTML = `
+            <div class="briefing-section">
+                <h3>🏘️ ${village.name} 현황</h3>
+                <p><strong>총 자산:</strong> ${village.totalValue.toLocaleString()}원</p>
+                <p><strong>수익률:</strong> <span style="color: ${village.returnRate >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">
+                    ${village.returnRate >= 0 ? '+' : ''}${village.returnRate}%
+                </span></p>
+                <p><strong>포트폴리오 비중:</strong> ${village.allocation}%</p>
+            </div>
+
+            <div class="briefing-section">
+                <h3>💼 보유 자산</h3>
+                ${village.assets.map(asset => {
+                    const assetName = typeof asset === 'string' ? asset : asset.name;
+                    const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
+                    const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value.toLocaleString()}원`;
+                    return `<p>• ${assetName}${assetType}${assetValue}</p>`;
+                }).join('')}
+            </div>
+
+            <div class="briefing-section">
+                <h3>📊 투자 정보</h3>
+                <p><strong>투자 유형:</strong> ${getVillageTypeText(village.type)}</p>
+                <p><strong>투자 목표:</strong> ${getVillageGoalText(village.goal)}</p>
+            </div>
+
+            <div class="briefing-section">
+                <h3>💡 오늘의 조언</h3>
+                <p>${getVillageAdvice(village)}</p>
+            </div>
+        `;
+
+        // 마을별 정기 브리핑 페이지로 이동
+        showPage('daily');
+    } else {
+        alert('해당 마을을 찾을 수 없습니다.');
+    }
+}
+
+// 마을 유형 텍스트 변환
+function getVillageTypeText(type) {
+    const typeMap = {
+        'growth': '성장형',
+        'dividend': '배당형',
+        'leverage': '레버리지형',
+        'domestic': '국내주식',
+        'etf': '글로벌 ETF',
+        'semiconductor': '반도체 섹터'
+    };
+    return typeMap[type] || type;
+}
+
+// 마을 목표 텍스트 변환
+function getVillageGoalText(goal) {
+    const goalMap = {
+        'long-term': '장기 투자',
+        'passive-income': '배당 소득',
+        'high-risk': '고위험 고수익',
+        'balanced': '균형 투자',
+        'diversification': '분산 투자',
+        'sector-focus': '섹터 집중'
+    };
+    return goalMap[goal] || goal;
+}
+
+// 마을별 조언 생성
+function getVillageAdvice(village) {
+    const adviceMap = {
+        'growth': '성장주는 장기적인 관점에서 접근하세요. 단기 변동성에 흔들리지 마세요.',
+        'dividend': '배당주는 꾸준한 현금 흐름을 제공합니다. 배당락일을 체크하세요.',
+        'leverage': '⚠️ 레버리지 상품은 높은 변동성을 가집니다. 리스크 관리에 주의하세요.',
+        'domestic': '국내 시장 뉴스와 정책 변화를 주시하세요.',
+        'etf': '글로벌 분산 투자로 리스크를 낮추고 있습니다. 좋은 전략입니다!',
+        'semiconductor': '반도체 업황과 글로벌 수요 동향을 주목하세요.'
+    };
+    return adviceMap[village.type] || '꾸준한 모니터링과 리밸런싱을 권장합니다.';
 }
 
 // TTS 음성 브리핑
