@@ -1,0 +1,13 @@
+# Claude Code
+.claude/
+
+# Legacy files
+ant-village.html
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

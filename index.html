@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개미 마을 - Ant Village</title>
+    <title>K-AMIs (캐미s) - Ant Village</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- 헤더 -->
     <header>
         <div class="container">
-            <div class="logo">개미 마을</div>
+            <div class="logo" onclick="showPage('main')">
+                <img src="public/logo.png" alt="K-AMIs Logo" class="logo-image">
+                <span class="logo-text">K-AMIs (캐미s)</span>
+            </div>
             <nav>
                 <button onclick="showPage('main')">홈</button>
                 <button onclick="showPage('villages')">마을 관리</button>
@@ -30,25 +33,23 @@
 
         <div class="world-map">
             <h2 style="text-align: center; margin-bottom: 30px; color: var(--dark);">전 세계 나의 투자 마을</h2>
-            <svg viewBox="0 0 800 400" style="width: 100%; height: auto;">
-                <!-- 간단한 세계 지도 표현 -->
-                <g id="korea" class="map-region" onclick="showVillageDetail('미장마을')">
-                    <circle cx="650" cy="150" r="30" fill="#FF6B35" opacity="0.8"/>
-                    <text x="650" y="155" text-anchor="middle" fill="white" font-size="14" font-weight="bold">한국</text>
-                </g>
-                <g id="usa" class="map-region" onclick="showVillageDetail('미장마을')">
-                    <circle cx="200" cy="180" r="40" fill="#F7931E" opacity="0.8"/>
-                    <text x="200" y="185" text-anchor="middle" fill="white" font-size="16" font-weight="bold">미국</text>
-                </g>
-                <g id="europe" class="map-region" onclick="showVillageDetail('배당마을')">
-                    <circle cx="420" cy="140" r="25" fill="#4ECDC4" opacity="0.8"/>
-                    <text x="420" y="145" text-anchor="middle" fill="white" font-size="12" font-weight="bold">유럽</text>
-                </g>
-                <g id="asia" class="map-region" onclick="showVillageDetail('신흥국마을')">
-                    <circle cx="600" cy="220" r="28" fill="#FFD23F" opacity="0.8"/>
-                    <text x="600" y="225" text-anchor="middle" fill="white" font-size="13" font-weight="bold">아시아</text>
-                </g>
-            </svg>
+            <div class="map-container">
+                <img src="public/map.png" alt="세계 지도" class="map-image">
+
+                <!-- 클릭 가능한 지역 핫스팟 -->
+                <div class="map-hotspot hotspot-korea" onclick="showVillageDetail('미장마을')" title="한국">
+                    <span class="hotspot-label">🇰🇷 한국</span>
+                </div>
+                <div class="map-hotspot hotspot-usa" onclick="showVillageDetail('미장마을')" title="미국">
+                    <span class="hotspot-label">🇺🇸 미국</span>
+                </div>
+                <div class="map-hotspot hotspot-europe" onclick="showVillageDetail('배당마을')" title="유럽">
+                    <span class="hotspot-label">🇪🇺 유럽</span>
+                </div>
+                <div class="map-hotspot hotspot-asia" onclick="showVillageDetail('신흥국마을')" title="아시아">
+                    <span class="hotspot-label">🌏 아시아</span>
+                </div>
+            </div>
         </div>
     </div>
 

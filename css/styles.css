@@ -73,12 +73,26 @@ header .container {
     color: var(--primary);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    cursor: pointer;
 }
 
-.logo::before {
-    content: '🐜';
-    font-size: 32px;
+.logo-image {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.logo:hover .logo-image {
+    transform: scale(1.05);
+}
+
+.logo-text {
+    font-family: 'Gowun Batang', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
 }
 
 nav {
@@ -443,9 +457,9 @@ nav button:hover {
     opacity: 0.9;
 }
 
-/* 세계 지도 (간단한 SVG 기반) */
+/* 세계 지도 (이미지 기반) */
 .world-map {
-    max-width: 800px;
+    max-width: 900px;
     margin: 40px auto;
     background: white;
     padding: 30px;
@@ -453,14 +467,68 @@ nav button:hover {
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.map-region {
-    cursor: pointer;
-    transition: all 0.3s ease;
+.map-container {
+    position: relative;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
 }
 
-.map-region:hover {
-    opacity: 0.7;
-    transform: scale(1.05);
+.map-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+}
+
+.map-hotspot {
+    position: absolute;
+    background: rgba(255, 107, 53, 0.85);
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    backdrop-filter: blur(5px);
+}
+
+.map-hotspot:hover {
+    transform: scale(1.1) translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    background: rgba(255, 107, 53, 0.95);
+}
+
+.hotspot-label {
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    white-space: nowrap;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+/* 각 지역별 위치 (지도 이미지 기준으로 조정 필요) */
+.hotspot-korea {
+    top: 30%;
+    right: 15%;
+    background: rgba(255, 107, 53, 0.85);
+}
+
+.hotspot-usa {
+    top: 35%;
+    left: 15%;
+    background: rgba(247, 147, 30, 0.85);
+}
+
+.hotspot-europe {
+    top: 25%;
+    left: 45%;
+    background: rgba(78, 205, 196, 0.85);
+}
+
+.hotspot-asia {
+    top: 50%;
+    right: 25%;
+    background: rgba(255, 210, 63, 0.85);
 }
 
 /* 모달 */
@@ -526,6 +594,33 @@ nav button:hover {
     nav {
         flex-wrap: wrap;
         gap: 10px;
+    }
+
+    /* 모바일에서 지도 핫스팟 크기 조정 */
+    .map-hotspot {
+        padding: 8px 16px;
+    }
+
+    .hotspot-label {
+        font-size: 12px;
+    }
+
+    .world-map {
+        padding: 20px;
+    }
+
+    /* 모바일에서 로고 크기 조정 */
+    .logo-image {
+        height: 40px;
+    }
+
+    .logo-text {
+        font-size: 20px;
+    }
+
+    header .container {
+        flex-direction: column;
+        gap: 15px;
     }
 }
 
