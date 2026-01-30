@@ -63,7 +63,16 @@
                 <img src="public/logo.png" alt="K-AMIs Logo" class="logo-image">
                 <span class="logo-text">K-AMIs (캐미s)</span>
             </div>
-            <nav>
+
+            <!-- 햄버거 메뉴 버튼 (모바일 전용) -->
+            <button class="hamburger-menu" onclick="toggleMobileMenu()" aria-label="메뉴">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <!-- 데스크톱 네비게이션 -->
+            <nav class="desktop-nav">
                 <button onclick="showPage('main')">홈</button>
                 <button onclick="showPage('villages')">마을 관리</button>
                 <button onclick="showPage('briefing')">아침 브리핑</button>
@@ -73,6 +82,46 @@
             </nav>
         </div>
     </header>
+
+    <!-- 모바일 사이드 메뉴 -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+        <div class="mobile-menu-content">
+            <div class="mobile-menu-header">
+                <div class="mobile-menu-logo">
+                    <img src="public/logo.png" alt="K-AMIs Logo" class="mobile-logo-image">
+                    <span class="mobile-logo-text">K-AMIs</span>
+                </div>
+                <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="닫기">&times;</button>
+            </div>
+            <nav class="mobile-nav">
+                <button onclick="showPage('main'); closeMobileMenu();">
+                    <span class="nav-icon">🏠</span>
+                    <span>홈</span>
+                </button>
+                <button onclick="showPage('villages'); closeMobileMenu();">
+                    <span class="nav-icon">🏘️</span>
+                    <span>마을 관리</span>
+                </button>
+                <button onclick="showPage('briefing'); closeMobileMenu();">
+                    <span class="nav-icon">📢</span>
+                    <span>아침 브리핑</span>
+                </button>
+                <button onclick="showPage('neighbors'); closeMobileMenu();">
+                    <span class="nav-icon">👥</span>
+                    <span>이웃 개미</span>
+                </button>
+                <button onclick="showPage('mypage'); closeMobileMenu();">
+                    <span class="nav-icon">👤</span>
+                    <span>마이페이지</span>
+                </button>
+                <button onclick="logout()" class="mobile-logout-button">
+                    <span class="nav-icon">🚪</span>
+                    <span>로그아웃</span>
+                </button>
+            </nav>
+        </div>
+    </div>
 
     <!-- 메인 페이지 -->
     <div id="mainPage" class="page active">

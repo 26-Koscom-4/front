@@ -1101,6 +1101,19 @@ window.onload = () => {
     }
 };
 
+// 모바일 메뉴 토글
+function toggleMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.classList.toggle('active');
+    document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+}
+
+function closeMobileMenu() {
+    const mobileMenu = document.getElementById('mobileMenu');
+    mobileMenu.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
 // 모달 외부 클릭 시 닫기
 window.onclick = (event) => {
     const modal = document.getElementById('villageModal');

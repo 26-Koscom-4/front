@@ -125,12 +125,13 @@ header .container {
     color: var(--primary);
 }
 
-nav {
+/* 데스크톱 네비게이션 */
+.desktop-nav {
     display: flex;
     gap: 25px;
 }
 
-nav button {
+.desktop-nav button {
     background: none;
     border: none;
     font-size: 16px;
@@ -142,7 +143,7 @@ nav button {
     transition: all 0.3s ease;
 }
 
-nav button:hover {
+.desktop-nav button:hover {
     background: var(--primary);
     color: white;
     transform: translateY(-2px);
@@ -155,6 +156,171 @@ nav button:hover {
 
 .logout-button:hover {
     background: #e55a5a !important;
+}
+
+/* 햄버거 메뉴 버튼 (기본 숨김) */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1001;
+}
+
+.hamburger-menu span {
+    width: 25px;
+    height: 3px;
+    background: var(--text);
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-menu:hover span {
+    background: var(--primary);
+}
+
+/* 모바일 사이드 메뉴 */
+.mobile-menu {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2000;
+    pointer-events: none;
+}
+
+.mobile-menu.active {
+    display: block;
+    pointer-events: auto;
+}
+
+.mobile-menu-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-menu.active .mobile-menu-overlay {
+    opacity: 1;
+}
+
+.mobile-menu-content {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 280px;
+    max-width: 80vw;
+    background: var(--card-bg);
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.3);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.mobile-menu.active .mobile-menu-content {
+    transform: translateX(0);
+}
+
+.mobile-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 2px solid var(--light);
+}
+
+.mobile-menu-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mobile-logo-image {
+    height: 35px;
+    width: auto;
+}
+
+.mobile-logo-text {
+    font-family: 'Gowun Batang', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.mobile-menu-close {
+    background: none;
+    border: none;
+    font-size: 32px;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+}
+
+.mobile-menu-close:hover {
+    color: var(--danger);
+}
+
+.mobile-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    overflow-y: auto;
+}
+
+.mobile-nav button {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: none;
+    border: none;
+    padding: 18px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.mobile-nav button:hover {
+    background: var(--light);
+    border-left-color: var(--primary);
+}
+
+.mobile-nav .nav-icon {
+    font-size: 24px;
+    width: 30px;
+    text-align: center;
+}
+
+.mobile-logout-button {
+    margin-top: auto;
+    color: var(--danger) !important;
+    border-top: 2px solid var(--light);
+}
+
+.mobile-logout-button:hover {
+    background: rgba(255, 107, 107, 0.1) !important;
+    border-left-color: var(--danger) !important;
 }
 
 /* 로그인 페이지 */
@@ -1339,16 +1505,18 @@ nav button:hover {
         margin: 0;
     }
 
-    /* 네비게이션 */
-    nav {
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: center;
+    /* 네비게이션 - 모바일에서는 햄버거 메뉴 사용 */
+    .desktop-nav {
+        display: none;
     }
 
-    nav button {
-        font-size: 14px;
-        padding: 6px 12px;
+    .hamburger-menu {
+        display: flex;
+    }
+
+    header .container {
+        flex-direction: row;
+        justify-content: space-between;
     }
 
     /* 지도 관련 */
@@ -1391,10 +1559,6 @@ nav button:hover {
         font-size: 20px;
     }
 
-    header .container {
-        flex-direction: column;
-        gap: 15px;
-    }
 
     /* 차트 섹션 */
     .asset-chart-section {
@@ -1606,9 +1770,17 @@ nav button:hover {
         grid-template-columns: 1fr;
     }
 
-    .nav button {
-        font-size: 13px;
-        padding: 5px 10px;
+    .mobile-menu-content {
+        width: 250px;
+    }
+
+    .mobile-nav button {
+        padding: 15px 18px;
+        font-size: 15px;
+    }
+
+    .mobile-nav .nav-icon {
+        font-size: 22px;
     }
 }
 
