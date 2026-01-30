@@ -161,6 +161,9 @@ function saveData(data) {
 
 // 페이지 전환
 function showPage(pageName) {
+    // 스크롤을 상단으로 이동
+    window.scrollTo(0, 0);
+
     // 로그인 페이지는 제외하고 전환
     const pages = document.querySelectorAll('.page:not(#loginPage)');
     pages.forEach(page => {
