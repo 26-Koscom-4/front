@@ -192,6 +192,8 @@ function showPage(pageName) {
         renderRecommendationBanner();
     } else if (pageName === 'mypage') {
         loadMypage();
+    } else if (pageName === 'briefing') {
+        renderVillageSelector();
     }
 }
 
@@ -474,6 +476,119 @@ function getVillageAdvice(village) {
         'semiconductor': '반도체 업황과 글로벌 수요 동향을 주목하세요.'
     };
     return adviceMap[village.type] || '꾸준한 모니터링과 리밸런싱을 권장합니다.';
+}
+
+// 마을 선택기 렌더링
+function renderVillageSelector() {
+    const data = loadData();
+    const grid = document.getElementById('villageSelectorGrid');
+
+    if (!grid) return;
+
+    grid.innerHTML = '';
+
+    data.villages.forEach(village => {
+        const card = document.createElement('div');
+        card.className = 'village-selector-card';
+        card.onclick = () => selectVillageForBriefing(village.name);
+
+        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+        const returnSign = village.returnRate >= 0 ? '+' : '';
+
+        card.innerHTML = `
+            <div class="village-selector-icon">${village.icon}</div>
+            <div class="village-selector-name">${village.name}</div>
+            <div class="village-selector-return ${returnClass}">${returnSign}${village.returnRate}%</div>
+        `;
+
+        grid.appendChild(card);
+    });
+
+    // 브리핑 컨텐츠 숨기기
+    document.getElementById('selectedVillageBriefing').style.display = 'none';
+    document.querySelector('.village-selector').style.display = 'block';
+}
+
+// 마을 선택 시 브리핑 표시
+function selectVillageForBriefing(villageName) {
+    const data = loadData();
+    const village = data.villages.find(v => v.name === villageName);
+
+    if (!village) return;
+
+    // 마을 아이콘과 이름 업데이트
+    document.getElementById('briefingAntAvatar').textContent = village.icon;
+    document.getElementById('briefingVillageName').textContent = village.name + ' 브리핑';
+
+    // 브리핑 내용 생성
+    const briefingContent = document.getElementById('briefingContent');
+    briefingContent.innerHTML = generateVillageBriefingContent(village);
+
+    // 선택기 숨기고 브리핑 표시
+    document.querySelector('.village-selector').style.display = 'none';
+    document.getElementById('selectedVillageBriefing').style.display = 'block';
+}
+
+// 마을별 브리핑 내용 생성
+function generateVillageBriefingContent(village) {
+    const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+    const returnSign = village.returnRate >= 0 ? '+' : '';
+
+    return `
+        <div class="briefing-section">
+            <h3>🏘️ ${village.name} 현황</h3>
+            <p>주인님, 좋은 아침입니다! ${village.name}의 현재 상황을 알려드립니다.</p>
+            <p><strong>총 자산:</strong> ${village.totalValue.toLocaleString()}원</p>
+            <p><strong>수익률:</strong> <span class="stat-value ${returnClass}">${returnSign}${village.returnRate}%</span></p>
+            <p><strong>포트폴리오 비중:</strong> ${village.allocation}%</p>
+        </div>
+
+        <div class="briefing-section">
+            <h3>💼 보유 자산 분석</h3>
+            ${village.assets.map(asset => {
+                const assetName = typeof asset === 'string' ? asset : asset.name;
+                const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
+                return `<p>• <strong>${assetName}</strong>${assetType} - 안정적으로 운영 중입니다.</p>`;
+            }).join('')}
+        </div>
+
+        <div class="briefing-section">
+            <h3>📊 투자 전략</h3>
+            <p><strong>투자 유형:</strong> ${getVillageTypeText(village.type)}</p>
+            <p><strong>투자 목표:</strong> ${getVillageGoalText(village.goal)}</p>
+        </div>
+
+        <div class="briefing-section">
+            <h3>💡 오늘의 조언</h3>
+            <p>${getVillageAdvice(village)}</p>
+            ${getMarketAdvice(village)}
+        </div>
+
+        <div class="briefing-section">
+            <h3>📅 금일 체크리스트</h3>
+            <p>✓ 시장 변동성 모니터링</p>
+            <p>✓ 주요 뉴스 확인</p>
+            <p>✓ 리밸런싱 필요 여부 검토</p>
+        </div>
+    `;
+}
+
+// 마을 유형별 시장 조언
+function getMarketAdvice(village) {
+    const adviceMap = {
+        'growth': '<p style="margin-top: 10px;">📈 기술주 중심 포트폴리오입니다. 실적 발표 시즌을 주목하세요.</p>',
+        'dividend': '<p style="margin-top: 10px;">💰 배당락일 3일 전입니다. 배당 수익 예상액을 확인하세요.</p>',
+        'leverage': '<p style="margin-top: 10px;">⚠️ VIX 지수가 상승 중입니다. 포지션 조정을 고려하세요.</p>',
+        'domestic': '<p style="margin-top: 10px;">🇰🇷 오늘 국내 증시는 외국인 수급에 주목하세요.</p>',
+        'etf': '<p style="margin-top: 10px;">🌍 글로벌 시장이 안정세를 보이고 있습니다.</p>',
+        'semiconductor': '<p style="margin-top: 10px;">🔬 반도체 업황 지표와 수주 동향을 체크하세요.</p>'
+    };
+    return adviceMap[village.type] || '';
+}
+
+// 마을 선택기로 돌아가기
+function showVillageSelector() {
+    renderVillageSelector();
 }
 
 // TTS 음성 브리핑
