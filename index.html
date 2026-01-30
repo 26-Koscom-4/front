@@ -429,6 +429,21 @@
                     </div>
                 </div>
 
+                <!-- 최근 활동 카드 -->
+                <div class="mypage-card">
+                    <h2 class="card-title">📅 최근 활동</h2>
+
+                    <div class="activity-list" id="activityList">
+                        <div class="activity-item">
+                            <div class="activity-icon">✨</div>
+                            <div class="activity-content">
+                                <div class="activity-title">K-AMIs에 오신 것을 환영합니다!</div>
+                                <div class="activity-time">방금 전</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 통계 카드 -->
                 <div class="mypage-card full-width">
                     <h2 class="card-title">📊 나의 투자 통계</h2>
@@ -480,21 +495,6 @@
                             <span style="font-size: 24px; margin-right: 10px;">🎯</span>
                             <span id="testButtonText">투자 성향 진단 시작하기</span>
                         </button>
-                    </div>
-                </div>
-
-                <!-- 최근 활동 카드 -->
-                <div class="mypage-card full-width">
-                    <h2 class="card-title">📅 최근 활동</h2>
-
-                    <div class="activity-list" id="activityList">
-                        <div class="activity-item">
-                            <div class="activity-icon">✨</div>
-                            <div class="activity-content">
-                                <div class="activity-title">K-AMIs에 오신 것을 환영합니다!</div>
-                                <div class="activity-time">방금 전</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -642,6 +642,21 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
             <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- 확인 모달 -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content confirm-modal-content">
+            <div class="confirm-header">
+                <div class="confirm-icon" id="confirmIcon">❓</div>
+                <h3 class="confirm-title" id="confirmTitle">확인</h3>
+                <p class="confirm-message" id="confirmMessage">정말로 진행하시겠습니까?</p>
+            </div>
+            <div class="confirm-buttons">
+                <button class="confirm-button cancel" id="confirmCancelBtn">취소</button>
+                <button class="confirm-button confirm" id="confirmConfirmBtn">확인</button>
+            </div>
         </div>
     </div>
 

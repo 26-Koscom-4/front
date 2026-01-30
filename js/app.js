@@ -1,3 +1,90 @@
+// ========== Toast 알림 시스템 ==========
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        <span class="toast-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+        <span class="toast-message">${message}</span>
+    `;
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('toast-exit');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// ========== 확인 모달 시스템 ==========
+function showConfirmModal(options) {
+    const {
+        title = '확인',
+        message = '정말로 진행하시겠습니까?',
+        icon = '❓',
+        confirmText = '확인',
+        cancelText = '취소',
+        confirmType = 'danger', // 'danger' or 'primary'
+        onConfirm = () => {},
+        onCancel = () => {}
+    } = options;
+
+    const modal = document.getElementById('confirmModal');
+    const confirmIcon = document.getElementById('confirmIcon');
+    const confirmTitle = document.getElementById('confirmTitle');
+    const confirmMessage = document.getElementById('confirmMessage');
+    const confirmBtn = document.getElementById('confirmConfirmBtn');
+    const cancelBtn = document.getElementById('confirmCancelBtn');
+
+    // 내용 설정
+    confirmIcon.textContent = icon;
+    confirmTitle.textContent = title;
+    confirmMessage.textContent = message;
+    confirmBtn.textContent = confirmText;
+    cancelBtn.textContent = cancelText;
+
+    // 버튼 타입 설정
+    confirmBtn.className = `confirm-button confirm ${confirmType}`;
+
+    // 모달 표시
+    modal.classList.add('active');
+
+    // 이벤트 핸들러
+    const handleConfirm = () => {
+        modal.classList.remove('active');
+        onConfirm();
+        cleanup();
+    };
+
+    const handleCancel = () => {
+        modal.classList.remove('active');
+        onCancel();
+        cleanup();
+    };
+
+    const cleanup = () => {
+        confirmBtn.removeEventListener('click', handleConfirm);
+        cancelBtn.removeEventListener('click', handleCancel);
+    };
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', handleCancel);
+
+    // ESC 키로 닫기
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            handleCancel();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+
+    // 오버레이 클릭으로 닫기
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            handleCancel();
+        }
+    };
+}
+
 // 샘플 데이터 초기화
 const sampleData = {
     user_profile: {
@@ -186,6 +273,9 @@ function showPage(pageName) {
         targetPage.style.display = 'block';
     }
 
+    // 네비게이션 활성 상태 업데이트
+    updateNavigationState(pageName);
+
     // 페이지별 초기화
     if (pageName === 'villages') {
         renderVillages();
@@ -197,6 +287,40 @@ function showPage(pageName) {
         loadMypage();
     } else if (pageName === 'briefing') {
         renderVillageSelector();
+    }
+}
+
+// 네비게이션 활성 상태 업데이트
+function updateNavigationState(pageName) {
+    // 데스크톱 네비게이션
+    const desktopButtons = document.querySelectorAll('.desktop-nav button:not(.logout-button)');
+    desktopButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // 모바일 네비게이션
+    const mobileButtons = document.querySelectorAll('.mobile-nav button:not(.mobile-logout-button)');
+    mobileButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // 현재 페이지에 해당하는 버튼 활성화
+    const pageButtonMap = {
+        'main': 0,
+        'villages': 1,
+        'briefing': 2,
+        'neighbors': 3,
+        'mypage': 4
+    };
+
+    const index = pageButtonMap[pageName];
+    if (index !== undefined) {
+        if (desktopButtons[index]) {
+            desktopButtons[index].classList.add('active');
+        }
+        if (mobileButtons[index]) {
+            mobileButtons[index].classList.add('active');
+        }
     }
 }
 
@@ -314,7 +438,7 @@ function showVillageDetail(villageName) {
 
         modal.classList.add('active');
     } else {
-        alert('해당 마을을 찾을 수 없습니다.');
+        showToast('해당 마을을 찾을 수 없습니다.', 'error');
     }
 }
 
@@ -385,7 +509,7 @@ function goToVillage(villageName) {
         // 마을별 정기 브리핑 페이지로 이동
         showPage('daily');
     } else {
-        alert('해당 마을을 찾을 수 없습니다.');
+        showToast('해당 마을을 찾을 수 없습니다.', 'error');
     }
 }
 
@@ -635,7 +759,7 @@ function playDailyBriefing() {
 
 // 마을 추가
 function addVillage(villageName) {
-    alert(`"${villageName}"이(가) 내 포트폴리오에 추가되었습니다! 🎉`);
+    showToast(`"${villageName}"이(가) 내 포트폴리오에 추가되었습니다! 🎉`);
 
     const data = loadData();
     const newVillage = {
@@ -736,7 +860,7 @@ function generateNewRecommendation() {
     saveData(data);
     renderRecommendationBanner();
 
-    alert('✨ 새로운 이웃 마을 추천이 생성되었습니다!');
+    showToast('✨ 새로운 이웃 마을 추천이 생성되었습니다!');
 }
 
 // 자산 차트 생성
@@ -942,7 +1066,7 @@ function saveProfile() {
     applyTheme(data.user_profile.theme);
 
     // 성공 메시지
-    alert('프로필이 저장되었습니다! ✅');
+    showToast('프로필이 저장되었습니다! ✅');
 
     // 활동 기록 추가
     addActivity('프로필 정보를 업데이트했습니다.');
@@ -967,7 +1091,7 @@ function saveSettings() {
     saveData(data);
 
     // 성공 메시지
-    alert('설정이 저장되었습니다! ✅');
+    showToast('설정이 저장되었습니다! ✅');
 
     // 활동 기록 추가
     addActivity('설정을 변경했습니다.');
@@ -1054,7 +1178,7 @@ function handleLogin(event) {
 
     // 공백 체크
     if (!userId || !userPw) {
-        alert('⚠️ 아이디와 비밀번호를 입력해주세요.');
+        showToast('아이디와 비밀번호를 입력해주세요.', 'error');
         return;
     }
 
@@ -1071,23 +1195,29 @@ function handleLogin(event) {
 
     // 환영 메시지
     setTimeout(() => {
-        alert(`✅ 환영합니다, ${userId}님!`);
+        showToast(`✅ 환영합니다, ${userId}님!`);
     }, 300);
 }
 
 // 로그아웃 처리
 function logout() {
-    const confirmed = confirm('로그아웃 하시겠습니까?');
+    showConfirmModal({
+        title: '로그아웃',
+        message: '정말 로그아웃 하시겠습니까?',
+        icon: '🚪',
+        confirmText: '로그아웃',
+        cancelText: '취소',
+        confirmType: 'danger',
+        onConfirm: () => {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userId');
 
-    if (confirmed) {
-        localStorage.removeItem('isLoggedIn');
-        localStorage.removeItem('userId');
+            // 로그인 페이지로 이동
+            showLoginPage();
 
-        // 로그인 페이지로 이동
-        showLoginPage();
-
-        alert('로그아웃되었습니다.');
-    }
+            showToast('로그아웃되었습니다.', 'info');
+        }
+    });
 }
 
 // 초기 로드
@@ -1341,7 +1471,7 @@ function updateSelectAllCheckbox() {
 // Step 3: 로딩 시작
 function startIntegrationLoading() {
     if (selectedInstitutions.length === 0) {
-        alert('연동할 금융기관을 최소 1개 이상 선택해주세요.');
+        showToast('연동할 금융기관을 최소 1개 이상 선택해주세요.', 'error');
         return;
     }
 
@@ -1448,7 +1578,7 @@ function finishIntegration() {
     const message = data.mydata_integration.integration_count === 1
         ? '✅ 자산 연동이 완료되었습니다! 이제 마을 관리 페이지에서 자산을 확인하세요.'
         : '✅ 자산 정보가 최신화되었습니다!';
-    alert(message);
+    showToast(message);
 
     // 통계 업데이트
     updateStatistics(data);
@@ -1791,10 +1921,24 @@ function startInvestmentTest() {
 
     // 이미 진단한 적이 있으면 다시 하기 확인
     if (data.investment_test && data.investment_test.completed) {
-        const confirm = window.confirm('이전 진단 결과가 있습니다. 다시 진단하시겠습니까?');
-        if (!confirm) return;
+        showConfirmModal({
+            title: '투자 성향 진단',
+            message: '이전 진단 결과가 있습니다. 다시 진단하시겠습니까?',
+            icon: '🎯',
+            confirmText: '다시 진단',
+            cancelText: '취소',
+            confirmType: 'primary',
+            onConfirm: () => {
+                beginInvestmentTest();
+            }
+        });
+    } else {
+        beginInvestmentTest();
     }
+}
 
+// 투자 진단 시작 (실제 로직)
+function beginInvestmentTest() {
     currentQuestionIndex = 0;
     userAnswers = [];
 
@@ -2043,11 +2187,21 @@ function updateTestSummary(typeInfo) {
 
 // 다시 진단하기
 function retakeTest() {
-    currentQuestionIndex = 0;
-    userAnswers = [];
-    document.getElementById('testQuestionsSection').style.display = 'block';
-    document.getElementById('testResultSection').style.display = 'none';
-    renderQuestion();
+    showConfirmModal({
+        title: '다시 진단하기',
+        message: '현재 진단 결과를 삭제하고 처음부터 다시 진단하시겠습니까?',
+        icon: '🔄',
+        confirmText: '다시 시작',
+        cancelText: '취소',
+        confirmType: 'primary',
+        onConfirm: () => {
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            document.getElementById('testQuestionsSection').style.display = 'block';
+            document.getElementById('testResultSection').style.display = 'none';
+            renderQuestion();
+        }
+    });
 }
 
 // 진단 모달 닫기

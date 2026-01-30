@@ -2,15 +2,18 @@
 
 :root {
     --primary: #FF6B35;
+    --primary-hover: #e55a2f;
     --secondary: #F7931E;
     --accent: #FFD23F;
     --dark: #1A1A2E;
     --darker: #0F0F1E;
     --light: #EEEEEE;
     --success: #4ECDC4;
+    --success-hover: #3db8af;
     --danger: #FF6B6B;
+    --danger-hover: #e55a5a;
     --text: #333;
-    --text-light: #666;
+    --text-light: #555;
     --bg-gradient-start: #667eea;
     --bg-gradient-end: #764ba2;
     --card-bg: #ffffff;
@@ -149,6 +152,16 @@ header .container {
     transform: translateY(-2px);
 }
 
+.desktop-nav button:focus {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.desktop-nav button.active {
+    background: var(--primary);
+    color: white;
+}
+
 .logout-button {
     background: var(--danger) !important;
     color: white !important;
@@ -156,6 +169,11 @@ header .container {
 
 .logout-button:hover {
     background: #e55a5a !important;
+}
+
+.logout-button:focus {
+    outline: 3px solid var(--danger) !important;
+    outline-offset: 2px;
 }
 
 /* 햄버거 메뉴 버튼 (기본 숨김) */
@@ -304,6 +322,13 @@ header .container {
 .mobile-nav button:hover {
     background: var(--light);
     border-left-color: var(--primary);
+}
+
+.mobile-nav button.active {
+    background: var(--light);
+    border-left-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
 }
 
 .mobile-nav .nav-icon {
@@ -483,10 +508,15 @@ header .container {
     box-shadow: 0 12px 35px rgba(0,0,0,0.3);
 }
 
+.cta-button:focus {
+    outline: 3px solid white;
+    outline-offset: 3px;
+}
+
 /* 마을 관리 페이지 */
 .village-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 30px;
     margin-top: 40px;
 }
@@ -558,8 +588,18 @@ header .container {
     color: var(--success);
 }
 
+.stat-value.positive::before {
+    content: '▲ ';
+    font-size: 0.8em;
+}
+
 .stat-value.negative {
     color: var(--danger);
+}
+
+.stat-value.negative::before {
+    content: '▼ ';
+    font-size: 0.8em;
 }
 
 .progress-bar {
@@ -713,9 +753,9 @@ header .container {
     color: white;
     border: none;
     padding: 15px 40px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
-    border-radius: 50px;
+    border-radius: 12px;
     cursor: pointer;
     margin: 0 10px;
     transition: all 0.3s ease;
@@ -723,8 +763,13 @@ header .container {
 }
 
 .audio-button:hover {
-    transform: scale(1.05);
+    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+}
+
+.audio-button:focus {
+    outline: 3px solid rgba(255, 107, 53, 0.5);
+    outline-offset: 2px;
 }
 
 .audio-button:disabled {
@@ -735,7 +780,7 @@ header .container {
 /* 이웃 개미 페이지 */
 .recommendation-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     margin-top: 40px;
 }
@@ -921,7 +966,8 @@ header .container {
 .map-hotspot {
     position: absolute;
     background: rgba(255, 107, 53, 0.85);
-    padding: 10px 20px;
+    padding: 12px 24px;
+    min-height: 44px;
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -933,6 +979,11 @@ header .container {
     transform: scale(1.1) translateY(-3px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.3);
     background: rgba(255, 107, 53, 0.95);
+}
+
+.map-hotspot:focus {
+    outline: 3px solid white;
+    outline-offset: 3px;
 }
 
 .hotspot-label {
@@ -1131,7 +1182,7 @@ header .container {
 /* 마이페이지 */
 .mypage-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 30px;
     margin-top: 40px;
 }
@@ -1316,14 +1367,35 @@ header .container {
 .activity-list {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.activity-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.activity-list::-webkit-scrollbar-track {
+    background: var(--light);
+    border-radius: 10px;
+}
+
+.activity-list::-webkit-scrollbar-thumb {
+    background: var(--text-light);
+    border-radius: 10px;
+}
+
+.activity-list::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
 }
 
 .activity-item {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px;
+    gap: 12px;
+    padding: 12px;
     background: var(--light);
     border-radius: 12px;
     transition: all 0.3s ease;
@@ -1331,11 +1403,11 @@ header .container {
 
 .activity-item:hover {
     background: #e0e0e0;
-    transform: translateX(5px);
+    transform: translateX(3px);
 }
 
 .activity-icon {
-    font-size: 28px;
+    font-size: 24px;
     flex-shrink: 0;
 }
 
@@ -1344,14 +1416,15 @@ header .container {
 }
 
 .activity-title {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--dark);
     margin-bottom: 4px;
+    line-height: 1.4;
 }
 
 .activity-time {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-light);
 }
 
@@ -1391,13 +1464,27 @@ header .container {
 
 .close-modal {
     float: right;
-    font-size: 28px;
+    font-size: 32px;
     cursor: pointer;
     color: var(--text-light);
+    padding: 8px;
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.3s ease;
 }
 
 .close-modal:hover {
     color: var(--danger);
+    background: rgba(255, 107, 107, 0.1);
+}
+
+.close-modal:focus {
+    outline: 3px solid var(--danger);
+    outline-offset: 2px;
 }
 
 /* 반응형 */
@@ -1521,11 +1608,50 @@ header .container {
 
     /* 지도 관련 */
     .map-hotspot {
-        padding: 6px 12px;
+        padding: 10px 18px;
+        min-height: 48px;
     }
 
     .hotspot-label {
-        font-size: 11px;
+        font-size: 13px;
+    }
+
+    /* Toast 모바일 */
+    .toast {
+        right: 15px;
+        left: 15px;
+        bottom: 15px;
+        max-width: none;
+    }
+
+    /* 확인 모달 모바일 */
+    .confirm-modal-content {
+        width: 95%;
+    }
+
+    .confirm-header {
+        padding: 30px 20px 20px;
+    }
+
+    .confirm-icon {
+        font-size: 48px;
+    }
+
+    .confirm-title {
+        font-size: 20px;
+    }
+
+    .confirm-message {
+        font-size: 14px;
+    }
+
+    .confirm-buttons {
+        padding: 15px;
+    }
+
+    .confirm-button {
+        padding: 12px 20px;
+        font-size: 15px;
     }
 
     .world-map {
@@ -1866,6 +1992,168 @@ header .container {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* 확인 모달 */
+.confirm-modal-content {
+    max-width: 400px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.confirm-header {
+    text-align: center;
+    padding: 40px 30px 30px;
+    background: linear-gradient(135deg, var(--stat-bg-start) 0%, var(--stat-bg-end) 100%);
+}
+
+.confirm-icon {
+    font-size: 64px;
+    margin-bottom: 15px;
+    animation: confirmPulse 1s ease infinite;
+}
+
+@keyframes confirmPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.confirm-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 12px;
+}
+
+.confirm-message {
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.confirm-buttons {
+    display: flex;
+    padding: 20px;
+    gap: 12px;
+    background: var(--card-bg);
+}
+
+.confirm-button {
+    flex: 1;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.confirm-button.cancel {
+    background: var(--light);
+    color: var(--text);
+}
+
+.confirm-button.cancel:hover {
+    background: #d0d0d0;
+    transform: translateY(-2px);
+}
+
+.confirm-button.cancel:focus {
+    outline: 3px solid var(--text-light);
+    outline-offset: 2px;
+}
+
+.confirm-button.confirm {
+    background: var(--danger);
+    color: white;
+}
+
+.confirm-button.confirm:hover {
+    background: var(--danger-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+}
+
+.confirm-button.confirm:focus {
+    outline: 3px solid rgba(255, 107, 107, 0.5);
+    outline-offset: 2px;
+}
+
+.confirm-button.confirm.primary {
+    background: var(--primary);
+}
+
+.confirm-button.confirm.primary:hover {
+    background: var(--primary-hover);
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+}
+
+/* Toast 알림 시스템 */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 600;
+    z-index: 3000;
+    animation: toastSlideIn 0.3s ease;
+    max-width: 400px;
+}
+
+.toast-success {
+    background: var(--success);
+    color: white;
+}
+
+.toast-error {
+    background: var(--danger);
+    color: white;
+}
+
+.toast-info {
+    background: var(--primary);
+    color: white;
+}
+
+.toast-icon {
+    font-size: 20px;
+}
+
+.toast-exit {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes toastSlideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
 /* 투자 성향 진단 */
 .investment-test-section {
     display: flex;
@@ -2193,11 +2481,18 @@ header .container {
 }
 
 .consent-checkbox {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     flex-shrink: 0;
     margin-top: 3px;
+    min-width: 24px;
+    min-height: 24px;
+}
+
+.consent-checkbox:focus {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .consent-label {
@@ -2282,10 +2577,17 @@ header .container {
 }
 
 .institution-checkbox {
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     cursor: pointer;
     flex-shrink: 0;
+    min-width: 24px;
+    min-height: 24px;
+}
+
+.institution-checkbox:focus {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
 }
 
 .institution-icon {
