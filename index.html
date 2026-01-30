@@ -460,6 +460,29 @@
                     </div>
                 </div>
 
+                <!-- 투자 성향 진단 카드 -->
+                <div class="mypage-card full-width">
+                    <h2 class="card-title">🎯 투자 성향 진단</h2>
+
+                    <div class="investment-test-section">
+                        <div class="test-description">
+                            <p>25개의 질문을 통해 나의 투자 성향을 분석하고, 맞춤형 포트폴리오를 추천받으세요.</p>
+                            <p style="font-size: 14px; color: var(--text-light); margin-top: 8px;">
+                                📊 5가지 투자 성향 분석 | ⏱️ 약 5분 소요
+                            </p>
+                        </div>
+
+                        <div id="testResultSummary" style="display: none; margin-top: 20px;">
+                            <!-- 진단 완료 시 요약 표시 -->
+                        </div>
+
+                        <button class="test-start-button" onclick="startInvestmentTest()">
+                            <span style="font-size: 24px; margin-right: 10px;">🎯</span>
+                            <span id="testButtonText">투자 성향 진단 시작하기</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- 최근 활동 카드 -->
                 <div class="mypage-card full-width">
                     <h2 class="card-title">📅 최근 활동</h2>
@@ -619,6 +642,67 @@
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">&times;</span>
             <div id="modalContent"></div>
+        </div>
+    </div>
+
+    <!-- 투자 성향 진단 모달 -->
+    <div id="investmentTestModal" class="modal">
+        <div class="modal-content investment-test-modal-content">
+            <span class="close-modal" onclick="closeInvestmentTest()">&times;</span>
+
+            <!-- 진단 진행 중 -->
+            <div id="testQuestionsSection">
+                <div class="test-header">
+                    <h2 style="color: var(--primary); margin-bottom: 10px;">🎯 투자 성향 진단</h2>
+                    <div class="test-progress">
+                        <div class="progress-bar-test">
+                            <div class="progress-fill-test" id="testProgressFill"></div>
+                        </div>
+                        <div class="progress-text-test" id="testProgressText">1 / 25</div>
+                    </div>
+                </div>
+
+                <div class="test-question-container">
+                    <h3 class="test-question" id="testQuestion">질문이 여기에 표시됩니다</h3>
+                    <div class="test-answers" id="testAnswers">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="test-navigation">
+                    <button class="test-nav-button" id="prevButton" onclick="previousQuestion()" disabled>이전</button>
+                    <button class="test-nav-button primary" id="nextButton" onclick="nextQuestion()" disabled>다음</button>
+                </div>
+            </div>
+
+            <!-- 진단 결과 -->
+            <div id="testResultSection" style="display: none;">
+                <div class="test-header">
+                    <h2 style="color: var(--success); margin-bottom: 10px;">✅ 진단 완료!</h2>
+                    <p style="color: var(--text-light); font-size: 14px;">당신의 투자 성향을 분석했습니다</p>
+                </div>
+
+                <div class="result-main-type" id="resultMainType">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div class="result-chart-container">
+                    <canvas id="resultChart"></canvas>
+                </div>
+
+                <div class="result-description" id="resultDescription">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div class="result-portfolio" id="resultPortfolio">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
+
+                <div class="test-result-buttons">
+                    <button class="test-nav-button" onclick="retakeTest()">다시 진단하기</button>
+                    <button class="test-nav-button primary" onclick="closeInvestmentTest()">확인</button>
+                </div>
+            </div>
         </div>
     </div>
 

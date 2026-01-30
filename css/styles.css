@@ -1732,6 +1732,51 @@ header .container {
         padding: 15px 30px;
         font-size: 16px;
     }
+
+    /* 투자 진단 모바일 */
+    .investment-test-modal-content {
+        padding: 25px 20px;
+    }
+
+    .test-question {
+        font-size: 18px;
+    }
+
+    .test-answer-button {
+        padding: 15px 18px;
+        font-size: 15px;
+    }
+
+    .test-nav-button {
+        padding: 12px 20px;
+        font-size: 15px;
+    }
+
+    .main-type-icon {
+        font-size: 60px;
+    }
+
+    .main-type-name {
+        font-size: 26px;
+    }
+
+    .main-type-desc {
+        font-size: 15px;
+    }
+
+    .result-chart-container {
+        max-width: 100%;
+        padding: 15px;
+    }
+
+    .recommended-villages {
+        gap: 8px;
+    }
+
+    .recommended-village-tag {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
 }
 
 /* 작은 모바일 (480px 이하) */
@@ -1782,6 +1827,29 @@ header .container {
     .mobile-nav .nav-icon {
         font-size: 22px;
     }
+
+    /* 투자 진단 작은 모바일 */
+    .test-question {
+        font-size: 16px;
+    }
+
+    .test-answer-button {
+        padding: 12px 15px;
+        font-size: 14px;
+    }
+
+    .main-type-icon {
+        font-size: 50px;
+    }
+
+    .main-type-name {
+        font-size: 22px;
+    }
+
+    .characteristics-list li {
+        font-size: 14px;
+        padding-left: 25px;
+    }
 }
 
 /* 추가 애니메이션 */
@@ -1796,6 +1864,261 @@ header .container {
 @keyframes slideUp {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* 투자 성향 진단 */
+.investment-test-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.test-description {
+    line-height: 1.7;
+    color: var(--text);
+}
+
+.test-start-button {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    border: none;
+    padding: 18px 35px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(255, 107, 53, 0.3);
+}
+
+.test-start-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 107, 53, 0.4);
+}
+
+/* 투자 진단 모달 */
+.investment-test-modal-content {
+    max-width: 700px;
+    padding: 40px;
+}
+
+.test-header {
+    text-align: center;
+    padding-bottom: 25px;
+    border-bottom: 2px solid var(--light);
+    margin-bottom: 30px;
+}
+
+.test-progress {
+    margin-top: 20px;
+}
+
+.progress-bar-test {
+    height: 10px;
+    background: var(--light);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.progress-fill-test {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.progress-text-test {
+    text-align: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+.test-question-container {
+    margin: 30px 0;
+}
+
+.test-question {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.test-answers {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.test-answer-button {
+    background: var(--light);
+    border: 2px solid transparent;
+    padding: 18px 20px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
+}
+
+.test-answer-button:hover {
+    background: #e0e0e0;
+    transform: translateX(5px);
+}
+
+.test-answer-button.selected {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(247, 147, 30, 0.1));
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.test-navigation {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid var(--light);
+}
+
+.test-nav-button {
+    flex: 1;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    border: 2px solid var(--light);
+    border-radius: 12px;
+    cursor: pointer;
+    background: var(--card-bg);
+    color: var(--text);
+    transition: all 0.3s ease;
+}
+
+.test-nav-button:hover:not(:disabled) {
+    background: var(--light);
+    transform: translateY(-2px);
+}
+
+.test-nav-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.test-nav-button.primary {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.test-nav-button.primary:hover:not(:disabled) {
+    background: #e55a2f;
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.3);
+}
+
+/* 진단 결과 */
+.result-main-type {
+    text-align: center;
+    padding: 30px;
+    background: linear-gradient(135deg, var(--stat-bg-start) 0%, var(--stat-bg-end) 100%);
+    border-radius: 20px;
+    margin-bottom: 30px;
+}
+
+.main-type-icon {
+    font-size: 80px;
+    margin-bottom: 15px;
+}
+
+.main-type-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 15px;
+}
+
+.main-type-desc {
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.6;
+}
+
+.result-chart-container {
+    max-width: 400px;
+    margin: 30px auto;
+    padding: 20px;
+    background: var(--light);
+    border-radius: 15px;
+}
+
+.result-description {
+    margin: 30px 0;
+    padding: 25px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    border-left: 5px solid var(--primary);
+}
+
+.characteristics-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.characteristics-list li {
+    padding: 10px 0;
+    padding-left: 30px;
+    position: relative;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.characteristics-list li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--success);
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.result-portfolio {
+    margin: 30px 0;
+    padding: 25px;
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.05), rgba(247, 147, 30, 0.05));
+    border-radius: 15px;
+    border: 2px solid var(--primary);
+}
+
+.recommended-villages {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.recommended-village-tag {
+    background: var(--primary);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.test-result-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
 }
 
 /* 마이데이터 연동 */
