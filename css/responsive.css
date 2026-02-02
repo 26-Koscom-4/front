@@ -5,11 +5,6 @@
         grid-template-columns: 1fr 1fr;
         gap: 20px;
     }
-
-    /* 자산 요약 섹션을 전체 너비로 */
-    .asset-summary-section {
-        grid-column: 1 / -1;
-    }
 }
 
 /* 모바일 (작은 화면) */
@@ -193,20 +188,21 @@
 
     /* 추천 배너 */
     .recommendation-banner {
-        padding: 15px 20px;
-        gap: 12px;
+        padding: 10px 15px;
+        gap: 10px;
+        max-width: 90%;
     }
 
     .banner-icon {
-        font-size: 28px;
+        font-size: 20px;
     }
 
     .banner-title {
-        font-size: 16px;
+        font-size: 13px;
     }
 
     .banner-subtitle {
-        font-size: 13px;
+        font-size: 11px;
     }
 
     /* 로고 */

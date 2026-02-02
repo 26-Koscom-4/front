@@ -111,6 +111,7 @@ const sampleData = {
     ],
     settings: {
         briefing_time: "08:00",
-        voice_speed: 1.0
+        voice_speed: 1.0,
+        font_size: 16
     }
 };

@@ -1,4 +1,8 @@
-async function renderVillages() {
+// 현재 필터 상태 저장
+let currentFilter = 'all';
+
+async function renderVillages(filterType = 'all') {
+    currentFilter = filterType;
     const grid = document.getElementById('villageGrid');
     grid.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
 
@@ -11,7 +15,26 @@ async function renderVillages() {
             return;
         }
 
-        data.villages.forEach(village => {
+        // 필터링 및 그룹화
+        if (filterType === 'all') {
+            renderVillageCards(data.villages, grid);
+        } else if (filterType === 'country') {
+            renderVillagesByCountry(data.villages, grid);
+        } else if (filterType === 'type') {
+            renderVillagesByType(data.villages, grid);
+        } else if (filterType === 'goal') {
+            renderVillagesByGoal(data.villages, grid);
+        } else if (filterType === 'custom') {
+            renderVillageCards(data.villages, grid);
+        }
+    } catch (error) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">마을 목록을 불러오는데 실패했습니다.</div>';
+    }
+}
+
+// 마을 카드 렌더링 함수
+function renderVillageCards(villages, grid) {
+    villages.forEach(village => {
             const card = document.createElement('div');
             card.className = 'village-card fade-in';
             card.onclick = () => showVillageDetail(village.id, village.name);
@@ -47,10 +70,55 @@ async function renderVillages() {
             `;
 
             grid.appendChild(card);
-        });
-    } catch (error) {
-        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">마을 목록을 불러오는데 실패했습니다.</div>';
-    }
+    });
+}
+
+// 국가별 필터링 (국가 관련 마을만)
+function renderVillagesByCountry(villages, grid) {
+    const countryVillages = villages.filter(village => {
+        return village.name.includes('한국') || village.name.includes('국장') || village.icon.includes('🇰🇷') ||
+               village.name.includes('미국') || village.name.includes('미장') || village.icon.includes('🇺🇸') ||
+               village.name.includes('글로벌') || village.name.includes('ETF') || village.icon.includes('🌍');
+    });
+
+    renderVillageCards(countryVillages, grid);
+}
+
+// 유형별 필터링 (국가 관련 마을 제외)
+function renderVillagesByType(villages, grid) {
+    const typeVillages = villages.filter(village => {
+        // 국가 관련 마을 제외
+        const isCountryVillage = village.name.includes('한국') || village.name.includes('국장') || village.icon.includes('🇰🇷') ||
+                                 village.name.includes('미국') || village.name.includes('미장') || village.icon.includes('🇺🇸') ||
+                                 village.name.includes('글로벌') || village.icon.includes('🌍');
+        return !isCountryVillage;
+    });
+
+    renderVillageCards(typeVillages, grid);
+}
+
+// 투자 성향별 필터링 (배당, 레버리지, 장투, 단타만)
+function renderVillagesByGoal(villages, grid) {
+    const goalVillages = villages.filter(village => {
+        return village.name.includes('배당') ||
+               village.name.includes('레버리지') ||
+               village.name.includes('장투') ||
+               village.name.includes('단타');
+    });
+
+    renderVillageCards(goalVillages, grid);
+}
+
+// 필터 변경 함수
+function filterVillages(filterType) {
+    // 탭 활성화 상태 변경
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    // 마을 재렌더링
+    renderVillages(filterType);
 }
 
 // 마을 상세 정보 모달
@@ -517,7 +585,7 @@ function playDailyBriefing() {
     speechSynthesis.speak(currentUtterance);
 }
 
-// 마을 추가
+// 마을 추가 (이웃 개미 페이지용)
 async function addVillage(villageName) {
     try {
         const newVillage = {
@@ -538,6 +606,122 @@ async function addVillage(villageName) {
         setTimeout(() => {
             showPage('villages');
         }, 1500);
+    } catch (error) {
+        console.error('마을 추가 오류:', error);
+        showToast('마을 추가에 실패했습니다.', 'error');
+    }
+}
+
+// 마을 추가 모달 열기
+function openAddVillageModal() {
+    const modal = document.getElementById('addVillageModal');
+    modal.classList.add('active');
+
+    // 폼 초기화
+    document.getElementById('newVillageName').value = '';
+    document.getElementById('newVillageType').value = '';
+    document.getElementById('newVillageGoal').value = '';
+    document.getElementById('newVillageIcon').value = '🏘️';
+
+    // 체크박스 초기화
+    document.querySelectorAll('input[name="villageAssets"]').forEach(cb => cb.checked = false);
+
+    // 아이콘 선택 초기화
+    document.querySelectorAll('.icon-select-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelector('.icon-select-btn[data-icon="🏘️"]').classList.add('selected');
+
+    // 노트 초기화 (첫 번째 항목만 남기기)
+    const notesList = document.getElementById('villageNotesList');
+    notesList.innerHTML = `
+        <div class="note-item" style="display: flex; gap: 8px;">
+            <input type="text" class="input-field village-note" placeholder="예: 기술주 위주 포트폴리오" style="flex: 1;">
+            <button type="button" class="note-remove-btn" onclick="removeNoteItem(this)" style="background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px;">×</button>
+        </div>
+    `;
+}
+
+// 아이콘 선택
+function selectVillageIcon(icon) {
+    document.getElementById('newVillageIcon').value = icon;
+    document.querySelectorAll('.icon-select-btn').forEach(btn => btn.classList.remove('selected'));
+    document.querySelector(`.icon-select-btn[data-icon="${icon}"]`).classList.add('selected');
+}
+
+// 노트 항목 추가
+function addNoteItem() {
+    const notesList = document.getElementById('villageNotesList');
+    const newItem = document.createElement('div');
+    newItem.className = 'note-item';
+    newItem.style.display = 'flex';
+    newItem.style.gap = '8px';
+    newItem.innerHTML = `
+        <input type="text" class="input-field village-note" placeholder="투자 전략 또는 특이사항 입력" style="flex: 1;">
+        <button type="button" class="note-remove-btn" onclick="removeNoteItem(this)" style="background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px;">×</button>
+    `;
+    notesList.appendChild(newItem);
+}
+
+// 노트 항목 제거
+function removeNoteItem(button) {
+    const notesList = document.getElementById('villageNotesList');
+    if (notesList.children.length > 1) {
+        button.parentElement.remove();
+    } else {
+        showToast('최소 1개의 항목은 필요합니다.', 'error');
+    }
+}
+
+// 마을 추가 모달 닫기
+function closeAddVillageModal() {
+    const modal = document.getElementById('addVillageModal');
+    modal.classList.remove('active');
+}
+
+// 새 마을 추가 제출
+async function submitNewVillage(event) {
+    event.preventDefault();
+
+    const villageName = document.getElementById('newVillageName').value.trim();
+    const villageType = document.getElementById('newVillageType').value;
+    const villageGoal = document.getElementById('newVillageGoal').value;
+    const villageIcon = document.getElementById('newVillageIcon').value || '🏘️';
+
+    // 선택된 종목 가져오기 (선택사항)
+    const selectedAssets = Array.from(document.querySelectorAll('input[name="villageAssets"]:checked'))
+        .map(cb => cb.value);
+
+    // 노트 수집
+    const notes = Array.from(document.querySelectorAll('.village-note'))
+        .map(input => input.value.trim())
+        .filter(note => note.length > 0);
+
+    try {
+        const newVillage = {
+            id: 'v' + Date.now(),
+            name: villageName,
+            icon: villageIcon,
+            assets: selectedAssets,
+            type: villageType,
+            goal: villageGoal,
+            totalValue: 0,
+            returnRate: 0,
+            allocation: 0,
+            notes: notes,
+            lastBriefingRead: null
+        };
+
+        const result = await fetchAPI('/villages', {
+            method: 'POST',
+            body: JSON.stringify(newVillage)
+        });
+
+        showToast(`"${villageName}" 마을이 추가되었습니다! 🎉`, 'success');
+
+        // 모달 닫기
+        closeAddVillageModal();
+
+        // 마을 목록 새로고침
+        await renderVillages(currentFilter);
     } catch (error) {
         console.error('마을 추가 오류:', error);
         showToast('마을 추가에 실패했습니다.', 'error');

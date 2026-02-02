@@ -165,7 +165,7 @@
                 </div>
 
                 <div class="map-container">
-                    <img src="public/map.png" alt="세계 지도" class="map-image">
+                    <img src="public/map.svg" alt="세계 지도" class="map-image">
 
                     <!-- 클릭 가능한 지역 핫스팟 -->
                     <div class="map-hotspot hotspot-korea" onclick="showVillageDetail('국장마을')" title="한국">
@@ -225,6 +225,16 @@
         <div class="container">
             <h1 class="page-title">나의 마을 관리</h1>
             <p class="page-subtitle">내 자산을 성격에 따라 마을로 분리하세요</p>
+
+            <!-- 필터 탭 -->
+            <div class="village-filter-tabs">
+                <button class="filter-tab active" onclick="filterVillages('all')">전체</button>
+                <button class="filter-tab" onclick="filterVillages('country')">국가별</button>
+                <button class="filter-tab" onclick="filterVillages('type')">유형별</button>
+                <button class="filter-tab" onclick="filterVillages('goal')">투자 성향별</button>
+                <button class="filter-tab" onclick="filterVillages('custom')">사용자 지정</button>
+                <button class="add-village-button" onclick="openAddVillageModal()">+ 마을 추가</button>
+            </div>
 
             <div class="village-grid" id="villageGrid">
                 <!-- JavaScript로 동적 생성 -->
@@ -541,6 +551,13 @@
                             <small class="helper-text">TTS 음성 재생 속도를 조절하세요</small>
                         </div>
 
+                        <div class="form-group">
+                            <label>글씨 크기</label>
+                            <input type="range" id="fontSize" class="range-slider" min="12" max="20" step="1" value="16">
+                            <div class="range-value" id="fontSizeValue">16px</div>
+                            <small class="helper-text">화면의 기본 글씨 크기를 조절하세요</small>
+                        </div>
+
                         <button class="save-button" onclick="saveSettings()">설정 저장</button>
                     </div>
                 </div>
@@ -834,6 +851,137 @@
                     <button class="test-nav-button primary" onclick="closeInvestmentTest()">확인</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 마을 추가 모달 -->
+    <div id="addVillageModal" class="modal">
+        <div class="modal-content mydata-modal-content">
+            <span class="close-modal" onclick="closeAddVillageModal()">&times;</span>
+
+            <div class="mydata-header">
+                <h2 style="color: var(--primary); margin-bottom: 10px;">🏘️ 새로운 마을 추가</h2>
+                <p style="color: var(--text-light); font-size: 14px;">나만의 투자 마을을 만들어보세요</p>
+            </div>
+
+            <form onsubmit="submitNewVillage(event)" style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- 마을 이름 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">마을 이름 *</label>
+                    <input type="text" id="newVillageName" class="input-field" placeholder="예: AI 반도체 마을" required>
+                </div>
+
+                <!-- 추가할 종목 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">추가할 종목</label>
+                    <div style="border: 2px solid var(--light); border-radius: 10px; padding: 15px; max-height: 200px; overflow-y: auto;">
+                        <div id="assetCheckboxList" style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- 목업 데이터 -->
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="AAPL" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>AAPL - Apple Inc. (기술주)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="TSLA" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>TSLA - Tesla Inc. (성장주)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="NVDA" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>NVDA - NVIDIA Corp. (AI주)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="MSFT" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>MSFT - Microsoft Corp. (기술주)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="삼성전자" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>삼성전자 (한국주식)</span>
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                                <input type="checkbox" name="villageAssets" value="SK하이닉스" style="width: 18px; height: 18px; cursor: pointer;">
+                                <span>SK하이닉스 (한국주식)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <small class="helper-text">보유 중인 종목에서 선택하세요 (선택사항)</small>
+                </div>
+
+                <!-- 투자 유형 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">투자 유형 *</label>
+                    <select id="newVillageType" class="input-field" required>
+                        <option value="">선택하세요</option>
+                        <option value="dividend">배당형</option>
+                        <option value="growth">성장형</option>
+                        <option value="long-term">장기투자형</option>
+                        <option value="short-term">단기투자형</option>
+                        <option value="leverage">레버리지형</option>
+                        <option value="mixed">복합형</option>
+                    </select>
+                </div>
+
+                <!-- 투자 목표 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">투자 목표 *</label>
+                    <select id="newVillageGoal" class="input-field" required>
+                        <option value="">선택하세요</option>
+                        <option value="long-term">장기 투자</option>
+                        <option value="passive-income">배당 소득</option>
+                        <option value="high-risk">고위험 고수익</option>
+                        <option value="balanced">균형 투자</option>
+                        <option value="diversification">분산 투자</option>
+                        <option value="sector-focus">섹터 집중</option>
+                    </select>
+                </div>
+
+                <!-- 마을 아이콘 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">마을 아이콘 *</label>
+                    <div class="icon-slider-container">
+                        <button type="button" class="icon-select-btn" data-icon="🏘️" onclick="selectVillageIcon('🏘️')">🏘️</button>
+                        <button type="button" class="icon-select-btn" data-icon="🚀" onclick="selectVillageIcon('🚀')">🚀</button>
+                        <button type="button" class="icon-select-btn" data-icon="💎" onclick="selectVillageIcon('💎')">💎</button>
+                        <button type="button" class="icon-select-btn" data-icon="🌟" onclick="selectVillageIcon('🌟')">🌟</button>
+                        <button type="button" class="icon-select-btn" data-icon="💰" onclick="selectVillageIcon('💰')">💰</button>
+                        <button type="button" class="icon-select-btn" data-icon="📈" onclick="selectVillageIcon('📈')">📈</button>
+                        <button type="button" class="icon-select-btn" data-icon="🎯" onclick="selectVillageIcon('🎯')">🎯</button>
+                        <button type="button" class="icon-select-btn" data-icon="🔥" onclick="selectVillageIcon('🔥')">🔥</button>
+                        <button type="button" class="icon-select-btn" data-icon="⚡" onclick="selectVillageIcon('⚡')">⚡</button>
+                        <button type="button" class="icon-select-btn" data-icon="🌈" onclick="selectVillageIcon('🌈')">🌈</button>
+                        <button type="button" class="icon-select-btn" data-icon="🏆" onclick="selectVillageIcon('🏆')">🏆</button>
+                        <button type="button" class="icon-select-btn" data-icon="💻" onclick="selectVillageIcon('💻')">💻</button>
+                        <button type="button" class="icon-select-btn" data-icon="🤖" onclick="selectVillageIcon('🤖')">🤖</button>
+                        <button type="button" class="icon-select-btn" data-icon="🔬" onclick="selectVillageIcon('🔬')">🔬</button>
+                        <button type="button" class="icon-select-btn" data-icon="🏦" onclick="selectVillageIcon('🏦')">🏦</button>
+                        <button type="button" class="icon-select-btn" data-icon="🌍" onclick="selectVillageIcon('🌍')">🌍</button>
+                        <button type="button" class="icon-select-btn" data-icon="🎨" onclick="selectVillageIcon('🎨')">🎨</button>
+                        <button type="button" class="icon-select-btn" data-icon="🎪" onclick="selectVillageIcon('🎪')">🎪</button>
+                        <button type="button" class="icon-select-btn" data-icon="🎭" onclick="selectVillageIcon('🎭')">🎭</button>
+                        <button type="button" class="icon-select-btn" data-icon="🎬" onclick="selectVillageIcon('🎬')">🎬</button>
+                    </div>
+                    <input type="hidden" id="newVillageIcon" value="🏘️" required>
+                    <small class="helper-text">좌우로 슬라이드하여 아이콘을 선택하세요</small>
+                </div>
+
+                <!-- 특이사항/메모 -->
+                <div class="form-group">
+                    <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--dark);">특이사항 / 투자 전략</label>
+                    <div id="villageNotesList" style="display: flex; flex-direction: column; gap: 10px;">
+                        <div class="note-item" style="display: flex; gap: 8px;">
+                            <input type="text" class="input-field village-note" placeholder="예: 기술주 위주 포트폴리오" style="flex: 1;">
+                            <button type="button" class="note-remove-btn" onclick="removeNoteItem(this)" style="background: var(--danger); color: white; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px;">×</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNoteItem()" style="margin-top: 10px; background: var(--light); border: 2px dashed var(--text-light); color: var(--text); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%;">+ 항목 추가</button>
+                    <small class="helper-text">투자 전략이나 특이사항을 한 줄씩 추가하세요</small>
+                </div>
+
+                <!-- 버튼 -->
+                <div class="mydata-buttons">
+                    <button type="button" class="mydata-button secondary" onclick="closeAddVillageModal()">취소</button>
+                    <button type="submit" class="mydata-button primary">마을 추가</button>
+                </div>
+            </form>
         </div>
     </div>
 

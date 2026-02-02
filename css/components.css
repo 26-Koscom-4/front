@@ -35,12 +35,12 @@
 /* 메인 컨텐츠 래퍼 (지도, 차트, 요약을 같은 라인에 표시) */
 .main-content-wrapper {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 25px;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
     max-width: 1600px;
     margin: 40px auto;
-    padding: 0 20px;
-    align-items: flex-start;
+    padding: 0 15px;
+    align-items: stretch;
 }
 
 /* 세계 지도 (이미지 기반) */
@@ -49,20 +49,27 @@
     padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    grid-column: 1 / -1; /* 전체 너비 */
+    position: relative;
+}
+
+.world-map h2 {
+    font-size: 36px;
 }
 
 /* 추천 배너 */
 .recommendation-banner {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 20px 25px;
-    margin-bottom: 25px;
+    gap: 12px;
+    padding: 12px 20px;
+    margin: 0 auto 20px auto;
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    border-radius: 15px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     animation: slideDown 0.5s ease-out;
+    max-width: 400px;
 }
 
 .recommendation-banner:hover {
@@ -71,36 +78,46 @@
 }
 
 .banner-icon {
-    font-size: 32px;
+    font-size: 24px;
     animation: pulse 2s infinite;
+    flex-shrink: 0;
 }
 
 .banner-content {
     flex: 1;
+    min-width: 0;
+    line-height: 1.3;
 }
 
 .banner-title {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 700;
     color: white;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .banner-subtitle {
-    font-size: 14px;
+    font-size: 12px;
     color: rgba(255, 255, 255, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .banner-arrow {
-    font-size: 24px;
+    font-size: 18px;
     color: white;
     font-weight: 700;
+    flex-shrink: 0;
 }
 
 .map-container {
     position: relative;
     width: 100%;
-    max-width: 800px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
@@ -137,7 +154,7 @@
 .hotspot-label {
     color: white;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 16px;
     white-space: nowrap;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
 }
@@ -168,10 +185,11 @@
 }
 
 .hotspot-recommendation {
-    bottom: 15%;
-    right: 10%;
+    bottom: -30px;
+    right: 0;
     background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     animation: pulse 2s infinite;
+    margin: 14px 28px;
 }
 
 .recommendation-pulse {
@@ -227,7 +245,7 @@
 /* 자산 차트 섹션 */
 .asset-chart-section {
     background: var(--card-bg);
-    padding: 30px;
+    padding: 25px 20px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     display: flex;
@@ -238,7 +256,7 @@
 /* 자산 요약 섹션 */
 .asset-summary-section {
     background: var(--card-bg);
-    padding: 30px;
+    padding: 25px 20px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     display: flex;

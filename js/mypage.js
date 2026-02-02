@@ -12,11 +12,21 @@ async function loadMypage() {
         document.getElementById('briefingTime').value = data.settings?.briefing_time || '08:00';
         document.getElementById('voiceSpeed').value = data.settings?.voice_speed || 1.0;
         document.getElementById('voiceSpeedValue').textContent = (data.settings?.voice_speed || 1.0) + 'x';
+        document.getElementById('fontSize').value = data.settings?.font_size || 16;
+        document.getElementById('fontSizeValue').textContent = (data.settings?.font_size || 16) + 'px';
 
         // 음성 속도 슬라이더 이벤트
         document.getElementById('voiceSpeed').addEventListener('input', function() {
             document.getElementById('voiceSpeedValue').textContent = this.value + 'x';
         });
+
+        // 글씨 크기 슬라이더 이벤트
+        document.getElementById('fontSize').addEventListener('input', function() {
+            document.getElementById('fontSizeValue').textContent = this.value + 'px';
+        });
+
+        // 글씨 크기 적용
+        applyFontSize(data.settings?.font_size || 16);
 
         // 통계 정보 계산 및 표시
         updateStatistics(data);
@@ -100,14 +110,23 @@ function saveSettings() {
 
     data.settings.briefing_time = document.getElementById('briefingTime').value;
     data.settings.voice_speed = parseFloat(document.getElementById('voiceSpeed').value);
+    data.settings.font_size = parseInt(document.getElementById('fontSize').value);
 
     saveData(data);
+
+    // 글씨 크기 적용
+    applyFontSize(data.settings.font_size);
 
     // 성공 메시지
     showToast('설정이 저장되었습니다! ✅');
 
     // 활동 기록 추가
     addActivity('설정을 변경했습니다.');
+}
+
+// 글씨 크기 적용 함수
+function applyFontSize(size) {
+    document.documentElement.style.fontSize = size + 'px';
 }
 
 // 활동 기록 추가

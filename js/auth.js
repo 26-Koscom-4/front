@@ -130,9 +130,10 @@ window.onload = () => {
     const isLoggedIn = checkLoginStatus();
 
     if (isLoggedIn) {
-        // 저장된 테마 적용
+        // 저장된 테마 및 설정 적용
         const data = loadData();
         applyTheme(data.userProfile.theme || 'light');
+        applyFontSize(data.settings?.font_size || 16);
 
         // showPage('main')이 호출되면서 자동으로 렌더링되므로 중복 호출 제거
         // renderVillages(), renderAssetChart() 등은 showPage()에서 처리됨

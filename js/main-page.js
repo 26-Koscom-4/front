@@ -213,7 +213,20 @@ async function renderAssetChart(mainData = null) {
             maintainAspectRatio: true,
             plugins: {
                 legend: {
-                    display: false
+                    display: true,
+                    position: 'bottom',
+                    labels: {
+                        padding: 18,
+                        font: {
+                            size: 16,
+                            family: "'Pretendard', sans-serif"
+                        },
+                        color: '#333',
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 10,
+                        boxHeight: 10
+                    }
                 },
                 tooltip: {
                     callbacks: {

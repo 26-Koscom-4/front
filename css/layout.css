@@ -39,8 +39,8 @@ header .container {
 }
 
 .logo {
-    font-family: 'Gowun Batang', serif;
-    font-size: 28px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 32px;
     font-weight: 700;
     color: var(--primary);
     display: flex;
@@ -61,8 +61,8 @@ header .container {
 }
 
 .logo-text {
-    font-family: 'Gowun Batang', serif;
-    font-size: 28px;
+    font-family: 'Pretendard', sans-serif;
+    font-size: 32px;
     font-weight: 700;
     color: var(--primary);
 }
@@ -76,7 +76,7 @@ header .container {
 .desktop-nav button {
     background: none;
     border: none;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 500;
     color: var(--text);
     cursor: pointer;
@@ -210,7 +210,7 @@ header .container {
 }
 
 .mobile-logo-text {
-    font-family: 'Gowun Batang', serif;
+    font-family: 'Pretendard', sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: var(--primary);
@@ -249,7 +249,7 @@ header .container {
     background: none;
     border: none;
     padding: 18px 20px;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 500;
     color: var(--text);
     cursor: pointer;
