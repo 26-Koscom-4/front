@@ -28,10 +28,10 @@ async function renderAnalysis() {
         const totalAssetCount = data.villages.reduce((sum, v) => sum + v.assets.length, 0);
         document.getElementById('analysisVillageInfo').textContent = totalAssetCount + '개 자산 보유';
 
-        // 리스크 등급
-        const riskInfo = getRiskInfo(data.totalReturn);
-        document.getElementById('analysisRiskLevel').textContent = riskInfo.level;
-        document.getElementById('analysisRiskDesc').textContent = riskInfo.desc;
+        // 투자 성향
+        const investStyle = getInvestmentStyle();
+        document.getElementById('analysisRiskLevel').textContent = investStyle.level;
+        document.getElementById('analysisRiskDesc').textContent = investStyle.desc;
 
         // 차트 렌더링
         renderVillagePerformanceChart(data.villages);
@@ -49,18 +49,16 @@ async function renderAnalysis() {
     }
 }
 
-// 리스크 등급 계산
-function getRiskInfo(totalReturn) {
-    const returnNum = parseFloat(totalReturn);
-    if (returnNum < 0) {
-        return { level: '고위험', desc: '손실 발생 중' };
-    } else if (returnNum < 5) {
-        return { level: '안정', desc: '안정적인 운용' };
-    } else if (returnNum < 10) {
-        return { level: '중립', desc: '균형잡힌 포트폴리오' };
-    } else {
-        return { level: '공격', desc: '고수익 추구형' };
+// 투자 성향 조회
+function getInvestmentStyle() {
+    const data = loadData();
+    if (data.investment_test && data.investment_test.completed && data.investment_test.mainType) {
+        const typeInfo = investmentTypes[data.investment_test.mainType];
+        if (typeInfo) {
+            return { level: typeInfo.name, desc: typeInfo.description.slice(0, 20) + '...' };
+        }
     }
+    return { level: '-', desc: '마이페이지에서 진단하기' };
 }
 
 // 마을별 수익률 차트
