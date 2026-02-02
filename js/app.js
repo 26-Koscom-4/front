@@ -101,17 +101,36 @@ async function fetchAPI(endpoint, options = {}) {
 
         // 데일리 브리핑
         if (endpoint === '/daily') {
+            // 배당마을 데이터 사용
+            const dividendVillage = sampleData.villages.find(v => v.name === "배당마을") || sampleData.villages[1];
+
+            const assetsHtml = dividendVillage.assets.map(asset => {
+                const returnClass = asset.dailyReturn >= 0 ? 'positive' : 'negative';
+                const returnSign = asset.dailyReturn >= 0 ? '+' : '';
+                return `<p><strong>${asset.name}</strong>: ${asset.type} - ${asset.value.toLocaleString()}원 <span class="stat-value ${returnClass}">(전일 ${returnSign}${asset.dailyReturn}%)</span></p>`;
+            }).join('');
+
             return {
                 briefing_content: `
                     <div class="briefing-section">
-                        <h3>🌅 장전 브리핑 (오전 8시)</h3>
-                        <p>미장마을의 오늘 전망입니다.</p>
-                        <p>선물 지수는 +0.5% 상승 중이며, 긍정적인 출발이 예상됩니다.</p>
+                        <h3>🏘️ ${dividendVillage.name} 요약</h3>
+                        <p><strong>총 자산:</strong> ${dividendVillage.totalValue.toLocaleString()}원</p>
+                        <p><strong>수익률:</strong> <span class="stat-value ${dividendVillage.returnRate >= 0 ? 'positive' : 'negative'}">${dividendVillage.returnRate >= 0 ? '+' : ''}${dividendVillage.returnRate}%</span></p>
+                        <p><strong>포트폴리오 비중:</strong> ${dividendVillage.allocation}%</p>
                     </div>
                     <div class="briefing-section">
-                        <h3>⚡ 레버리지마을 특별 경고</h3>
-                        <p style="color: var(--danger); font-weight: 700;">변동성 지수(VIX)가 18.5로 상승했습니다.</p>
-                        <p>레버리지 포지션 점검을 권장드립니다.</p>
+                        <h3>💼 보유 자산</h3>
+                        ${assetsHtml}
+                    </div>
+                    <div class="briefing-section">
+                        <h3>📊 투자 정보</h3>
+                        <p><strong>투자 유형:</strong> 배당형</p>
+                        <p><strong>투자 목표:</strong> 배당 수익</p>
+                    </div>
+                    <div class="briefing-section">
+                        <h3>💡 오늘의 조언</h3>
+                        <p>배당주는 안정적인 현금 흐름을 제공하며 배당락일 체크가 필요합니다.</p>
+                        <p style="margin-top: 10px;">💰 배당락일 3일 전입니다. 배당 수익 예상액을 확인하세요.</p>
                     </div>
                 `
             };
@@ -279,10 +298,10 @@ const sampleData = {
             name: "미장마을",
             icon: "🇺🇸",
             assets: [
-                { name: "AAPL", type: "기술주", value: 4000000 },
-                { name: "TSLA", type: "성장주", value: 3500000 },
-                { name: "NVDA", type: "AI주", value: 4500000 },
-                { name: "MSFT", type: "기술주", value: 3000000 }
+                { name: "AAPL", type: "기술주", value: 4000000, ticker: "AAPL", previousOpen: 225.50, previousClose: 228.75, dailyReturn: 1.44 },
+                { name: "TSLA", type: "성장주", value: 3500000, ticker: "TSLA", previousOpen: 412.30, previousClose: 405.80, dailyReturn: -1.58 },
+                { name: "NVDA", type: "AI주", value: 4500000, ticker: "NVDA", previousOpen: 875.20, previousClose: 892.60, dailyReturn: 1.99 },
+                { name: "MSFT", type: "기술주", value: 3000000, ticker: "MSFT", previousOpen: 421.85, previousClose: 425.30, dailyReturn: 0.82 }
             ],
             type: "growth",
             goal: "long-term",
@@ -296,9 +315,9 @@ const sampleData = {
             name: "배당마을",
             icon: "💰",
             assets: [
-                { name: "O", type: "배당ETF", value: 3000000 },
-                { name: "SCHD", type: "배당ETF", value: 3000000 },
-                { name: "VYM", type: "배당ETF", value: 2000000 }
+                { name: "O", type: "배당ETF", value: 3000000, ticker: "O", previousOpen: 56.80, previousClose: 57.25, dailyReturn: 0.79 },
+                { name: "SCHD", type: "배당ETF", value: 3000000, ticker: "SCHD", previousOpen: 78.50, previousClose: 78.95, dailyReturn: 0.57 },
+                { name: "VYM", type: "배당ETF", value: 2000000, ticker: "VYM", previousOpen: 112.30, previousClose: 113.10, dailyReturn: 0.71 }
             ],
             type: "dividend",
             goal: "passive-income",
@@ -312,9 +331,9 @@ const sampleData = {
             name: "레버리지마을",
             icon: "🚀",
             assets: [
-                { name: "TQQQ", type: "레버리지ETF", value: 2000000 },
-                { name: "UPRO", type: "레버리지ETF", value: 1500000 },
-                { name: "SOXL", type: "레버리지ETF", value: 1500000 }
+                { name: "TQQQ", type: "레버리지ETF", value: 2000000, ticker: "TQQQ", previousOpen: 68.50, previousClose: 66.80, dailyReturn: -2.48 },
+                { name: "UPRO", type: "레버리지ETF", value: 1500000, ticker: "UPRO", previousOpen: 62.30, previousClose: 61.10, dailyReturn: -1.93 },
+                { name: "SOXL", type: "레버리지ETF", value: 1500000, ticker: "SOXL", previousOpen: 28.90, previousClose: 29.70, dailyReturn: 2.77 }
             ],
             type: "leverage",
             goal: "high-risk",
@@ -328,9 +347,9 @@ const sampleData = {
             name: "국장마을",
             icon: "🇰🇷",
             assets: [
-                { name: "삼성전자", type: "한국주식", value: 2000000 },
-                { name: "SK하이닉스", type: "한국주식", value: 1500000 },
-                { name: "NAVER", type: "한국주식", value: 1500000 }
+                { name: "삼성전자", type: "한국주식", value: 2000000, ticker: "005930", previousOpen: 72500, previousClose: 73200, dailyReturn: 0.97 },
+                { name: "SK하이닉스", type: "한국주식", value: 1500000, ticker: "000660", previousOpen: 198000, previousClose: 201500, dailyReturn: 1.77 },
+                { name: "NAVER", type: "한국주식", value: 1500000, ticker: "035420", previousOpen: 186500, previousClose: 184000, dailyReturn: -1.34 }
             ],
             type: "domestic",
             goal: "balanced",
@@ -344,9 +363,9 @@ const sampleData = {
             name: "글로벌ETF마을",
             icon: "🌍",
             assets: [
-                { name: "VTI", type: "성장ETF", value: 3000000 },
-                { name: "QQQ", type: "성장ETF", value: 2500000 },
-                { name: "SPY", type: "성장ETF", value: 2000000 }
+                { name: "VTI", type: "성장ETF", value: 3000000, ticker: "VTI", previousOpen: 298.50, previousClose: 301.20, dailyReturn: 0.90 },
+                { name: "QQQ", type: "성장ETF", value: 2500000, ticker: "QQQ", previousOpen: 522.80, previousClose: 527.30, dailyReturn: 0.86 },
+                { name: "SPY", type: "성장ETF", value: 2000000, ticker: "SPY", previousOpen: 588.20, previousClose: 591.80, dailyReturn: 0.61 }
             ],
             type: "etf",
             goal: "diversification",
@@ -360,9 +379,9 @@ const sampleData = {
             name: "반도체마을",
             icon: "🔬",
             assets: [
-                { name: "TSM", type: "기술주", value: 2500000 },
-                { name: "ASML", type: "기술주", value: 2000000 },
-                { name: "AMD", type: "AI주", value: 1500000 }
+                { name: "TSM", type: "기술주", value: 2500000, ticker: "TSM", previousOpen: 195.30, previousClose: 199.80, dailyReturn: 2.30 },
+                { name: "ASML", type: "기술주", value: 2000000, ticker: "ASML", previousOpen: 832.50, previousClose: 845.20, dailyReturn: 1.53 },
+                { name: "AMD", type: "AI주", value: 1500000, ticker: "AMD", previousOpen: 128.40, previousClose: 131.90, dailyReturn: 2.73 }
             ],
             type: "semiconductor",
             goal: "sector-focus",
@@ -900,7 +919,16 @@ function generateVillageBriefingContent(village) {
             ${village.assets.map(asset => {
                 const assetName = typeof asset === 'string' ? asset : asset.name;
                 const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
-                return `<p>• <strong>${assetName}</strong>${assetType} - 안정적으로 운영 중입니다.</p>`;
+
+                // 전일자 시가/종가 수익률 표시
+                let returnInfo = '';
+                if (asset.dailyReturn !== undefined && asset.dailyReturn !== null) {
+                    const returnClass = asset.dailyReturn >= 0 ? 'positive' : 'negative';
+                    const returnSign = asset.dailyReturn >= 0 ? '+' : '';
+                    returnInfo = ` <span class="stat-value ${returnClass}">[전일 ${returnSign}${asset.dailyReturn}%]</span>`;
+                }
+
+                return `<p>• <strong>${assetName}</strong>${assetType}${returnInfo} - 안정적으로 운영 중입니다.</p>`;
             }).join('')}
         </div>
 
