@@ -206,63 +206,168 @@ function goToVillageAndCloseModal(villageName) {
     }, 300); // 모달 닫기 애니메이션 대기
 }
 
-// 마을로 이동
+// 마을 분석 차트 변수
+let villageReturnChart = null;
+
+// 마을로 이동 (마을 분석 페이지)
 function goToVillage(villageName) {
     const data = loadData();
     const village = data.villages.find(v => v.name === villageName);
 
     if (village) {
-        // 마을 이름 업데이트
+        // 마을 이름 및 아이콘 업데이트
         document.getElementById('dailyVillageName').textContent = village.name;
-
-        // 마을 아이콘으로 아바타 변경
         const avatar = document.querySelector('#dailyBriefingPage .ant-avatar');
         if (avatar) {
             avatar.textContent = village.icon;
         }
 
-        // 브리핑 내용 업데이트
-        const briefingContent = document.getElementById('dailyBriefingContent');
-        briefingContent.innerHTML = `
-            <div class="briefing-section">
-                <h3>🏘️ ${village.name} 현황</h3>
-                <p><strong>총 자산:</strong> ${village.totalValue.toLocaleString()}원</p>
-                <p><strong>수익률:</strong> <span style="color: ${village.returnRate >= 0 ? 'var(--success)' : 'var(--danger)'}; font-weight: 700;">
-                    ${village.returnRate >= 0 ? '+' : ''}${village.returnRate}%
-                </span></p>
-                <p><strong>포트폴리오 비중:</strong> ${village.allocation}%</p>
-            </div>
+        // 마을 요약 정보 업데이트
+        document.getElementById('villageAnalysisTotalValue').textContent = village.totalValue.toLocaleString() + '원';
+        const returnRateElement = document.getElementById('villageAnalysisReturnRate');
+        returnRateElement.textContent = (village.returnRate >= 0 ? '+' : '') + village.returnRate + '%';
+        returnRateElement.style.color = village.returnRate >= 0 ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('villageAnalysisAssetCount').textContent = village.assets.length + '개';
 
-            <div class="briefing-section">
-                <h3>💼 보유 자산</h3>
-                ${village.assets.map(asset => {
-                    const assetName = typeof asset === 'string' ? asset : asset.name;
-                    const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
-                    const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value.toLocaleString()}원`;
-                    return `<p>• ${assetName}${assetType}${assetValue}</p>`;
-                }).join('')}
-            </div>
+        // 수익률 차트 렌더링
+        renderVillageReturnChart(village);
 
-            <div class="briefing-section">
-                <h3>📊 투자 정보</h3>
-                <p><strong>투자 유형:</strong> ${getVillageTypeText(village.type)}</p>
-                <p><strong>투자 목표:</strong> ${getVillageGoalText(village.goal)}</p>
-            </div>
+        // 보유 자산 목록
+        const assetsContainer = document.getElementById('villageAnalysisAssets');
+        assetsContainer.innerHTML = village.assets.map(asset => {
+            const assetName = typeof asset === 'string' ? asset : asset.name;
+            const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
+            const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value.toLocaleString()}원`;
+            return `<p style="margin: 8px 0;">• <strong>${assetName}</strong>${assetType}${assetValue}</p>`;
+        }).join('');
 
-            <div class="briefing-section">
-                <h3>💡 오늘의 조언</h3>
-                <p>${getVillageAdvice(village)}</p>
-            </div>
+        // AI 포트폴리오 분석
+        document.getElementById('villageAnalysisAdvice').innerHTML = `
+            <p>${getVillageAdvice(village)}</p>
+            ${getMarketAdvice(village)}
         `;
+
+        // AI 포트폴리오 리밸런싱
+        document.getElementById('villageAnalysisRebalancing').innerHTML = generateRebalancingContent(village);
 
         // 브리핑 읽음 처리
         markBriefingAsRead(villageName);
 
-        // 마을별 정기 브리핑 페이지로 이동
+        // 마을 분석 페이지로 이동
         showPage('daily');
     } else {
         showToast('해당 마을을 찾을 수 없습니다.', 'error');
     }
+}
+
+// 마을 수익률 차트 렌더링
+function renderVillageReturnChart(village) {
+    const canvas = document.getElementById('villageReturnChart');
+    if (!canvas) return;
+
+    // 기존 차트 삭제
+    if (villageReturnChart) {
+        villageReturnChart.destroy();
+    }
+
+    // 목업 데이터: 최근 12개월 수익률
+    const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+
+    // 마을 유형에 따라 다른 패턴의 목업 데이터 생성
+    let returnData;
+    if (village.type === 'growth') {
+        returnData = [2.3, 3.1, -1.2, 4.5, 2.8, 5.2, 3.7, -0.8, 6.1, 4.2, 3.9, 5.5];
+    } else if (village.type === 'dividend') {
+        returnData = [1.5, 1.8, 1.2, 2.1, 1.9, 2.3, 1.7, 2.0, 1.8, 2.2, 1.9, 2.5];
+    } else if (village.type === 'leverage') {
+        returnData = [5.2, -3.8, 8.1, -2.5, 7.3, 4.9, -4.2, 9.1, -1.8, 6.5, 3.2, -2.1];
+    } else if (village.type === 'domestic') {
+        returnData = [1.8, 2.5, -0.8, 3.2, 2.1, 1.9, 2.8, 1.5, 3.5, 2.7, 2.3, 3.1];
+    } else {
+        returnData = [2.1, 2.8, 1.5, 3.2, 2.5, 3.8, 2.9, 1.8, 4.2, 3.1, 2.7, 3.9];
+    }
+
+    // 색상 설정 (양수: 초록, 음수: 빨강)
+    const backgroundColors = returnData.map(value =>
+        value >= 0 ? 'rgba(78, 205, 196, 0.8)' : 'rgba(255, 107, 107, 0.8)'
+    );
+
+    const ctx = canvas.getContext('2d');
+    villageReturnChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: months,
+            datasets: [{
+                label: '월별 수익률 (%)',
+                data: returnData,
+                backgroundColor: backgroundColors,
+                borderColor: returnData.map(value =>
+                    value >= 0 ? 'rgba(78, 205, 196, 1)' : 'rgba(255, 107, 107, 1)'
+                ),
+                borderWidth: 2,
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                    labels: {
+                        font: {
+                            size: 14,
+                            family: "'Pretendard', sans-serif"
+                        },
+                        color: '#333'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const value = context.parsed.y;
+                            return `수익률: ${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
+                        }
+                    },
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    padding: 12,
+                    titleFont: { size: 14 },
+                    bodyFont: { size: 13 }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        },
+                        font: {
+                            size: 13,
+                            family: "'Pretendard', sans-serif"
+                        },
+                        color: '#666'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 13,
+                            family: "'Pretendard', sans-serif"
+                        },
+                        color: '#666'
+                    }
+                }
+            }
+        }
+    });
 }
 
 // 브리핑 읽음 처리
@@ -448,55 +553,148 @@ function selectVillageForBriefing(villageName, villageData = null) {
     document.getElementById('selectedVillageBriefing').style.display = 'block';
 }
 
+// 마을 type별 목업 뉴스 데이터
+const villageNewsMap = {
+    'growth': [
+        { title: 'AI 관련주 급등세 지속', summary: 'OpenAI 신규 모델 발표 이후 AI 관련 기술주 강세가 이어지고 있습니다.', time: '2시간 전' },
+        { title: '빅테크 실적 시즌 개막', summary: '이번 주부터 주요 빅테크 기업들의 분기 실적 발표가 시작됩니다.', time: '4시간 전' },
+        { title: '나스닥 사상 최고치 경신', summary: '기술주 랠리에 힘입어 나스닥 지수가 신고가를 기록했습니다.', time: '6시간 전' }
+    ],
+    'dividend': [
+        { title: '고배당 ETF 자금 유입 증가', summary: '금리 인하 기대감에 고배당 ETF로의 자금 유입이 크게 증가하고 있습니다.', time: '1시간 전' },
+        { title: '배당 시즌 앞두고 배당주 관심 증가', summary: '연말 배당 시즌이 다가오면서 배당 수익률이 높은 종목에 관심이 집중됩니다.', time: '3시간 전' },
+        { title: '리츠(REITs) 시장 회복 조짐', summary: '금리 인하 전망이 부동산 리츠 시장의 회복을 견인하고 있습니다.', time: '5시간 전' }
+    ],
+    'leverage': [
+        { title: 'VIX 지수 급등, 변동성 확대', summary: '글로벌 지정학적 리스크로 VIX 지수가 급등하며 변동성이 확대되고 있습니다.', time: '30분 전' },
+        { title: '레버리지 ETF 거래량 급증', summary: '시장 변동성 확대 속 레버리지/인버스 ETF 거래량이 크게 늘었습니다.', time: '2시간 전' },
+        { title: '선물 시장 롤오버 일정 안내', summary: '이번 주 주요 선물 만기일이 다가오고 있어 롤오버에 유의하세요.', time: '4시간 전' }
+    ],
+    'domestic': [
+        { title: '코스피 외국인 순매수 전환', summary: '외국인 투자자가 3거래일 연속 코스피 순매수를 기록했습니다.', time: '1시간 전' },
+        { title: '정부 경기부양책 발표 예정', summary: '이번 주 중 정부의 추가 경기부양 정책이 발표될 예정입니다.', time: '3시간 전' },
+        { title: '원/달러 환율 하락세 지속', summary: '달러 약세 흐름 속 원/달러 환율이 하락세를 이어가고 있습니다.', time: '5시간 전' }
+    ],
+    'etf': [
+        { title: '글로벌 ETF 시장 사상 최대 규모', summary: '전 세계 ETF 운용 자산이 사상 최대치를 경신했습니다.', time: '2시간 전' },
+        { title: '신흥국 ETF 자금 유입 확대', summary: '인도, 베트남 등 신흥국 ETF에 대한 투자자 관심이 높아지고 있습니다.', time: '4시간 전' },
+        { title: '액티브 ETF 출시 러시', summary: '올해 액티브 ETF 신규 상장이 급증하며 투자 선택지가 넓어지고 있습니다.', time: '6시간 전' }
+    ],
+    'semiconductor': [
+        { title: 'HBM 수요 폭발적 증가', summary: 'AI 서버 수요 증가로 HBM 반도체 주문이 사상 최대를 기록했습니다.', time: '1시간 전' },
+        { title: 'TSMC 실적 어닝 서프라이즈', summary: 'TSMC의 분기 실적이 시장 예상치를 크게 상회했습니다.', time: '3시간 전' },
+        { title: '반도체 장비주 수주 호조', summary: '글로벌 반도체 장비 업체들의 수주 잔고가 크게 늘어나고 있습니다.', time: '5시간 전' }
+    ]
+};
+
 // 마을별 브리핑 내용 생성
 function generateVillageBriefingContent(village) {
-    const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
-    const returnSign = village.returnRate >= 0 ? '+' : '';
+    if (!village) return '<p>마을 데이터를 불러올 수 없습니다.</p>';
+
+    const totalValue = village.totalValue ?? 0;
+    const returnRate = village.returnRate ?? 0;
+    const assets = village.assets ?? [];
+
+    const returnClass = returnRate >= 0 ? 'positive' : 'negative';
+    const returnSign = returnRate >= 0 ? '+' : '';
+
+    // 섹션 1: 마을 총 수익률 + 평가손익
+    const profitLoss = Math.round(totalValue * returnRate / (100 + returnRate));
+    const profitLossClass = profitLoss >= 0 ? 'positive' : 'negative';
+    const profitLossSign = profitLoss >= 0 ? '+' : '';
+
+    // 섹션 2: 전일대비 등락 수익률 (가중평균)
+    let villageDailyReturn = 0;
+    let dailyCount = 0;
+    assets.forEach(asset => {
+        if (typeof asset !== 'string' && asset.dailyReturn != null) {
+            villageDailyReturn += asset.dailyReturn;
+            dailyCount++;
+        }
+    });
+    if (dailyCount === 0) {
+        // 목업: 종목별 dailyReturn이 없으면 랜덤 생성
+        villageDailyReturn = parseFloat(((Math.random() - 0.4) * 3).toFixed(2));
+    } else {
+        villageDailyReturn = parseFloat((villageDailyReturn / dailyCount).toFixed(2));
+    }
+    const dailyClass = villageDailyReturn >= 0 ? 'positive' : 'negative';
+    const dailySign = villageDailyReturn >= 0 ? '+' : '';
+
+    // 섹션 3 & 4: 보유 종목별 수익률
+    const assetTotalReturnHtml = assets.map(asset => {
+        const name = typeof asset === 'string' ? asset : (asset.name ?? '알 수 없음');
+        // 목업 총 수익률
+        const mockReturn = typeof asset === 'string'
+            ? parseFloat(((Math.random() - 0.3) * 30).toFixed(2))
+            : (asset.returnRate ?? parseFloat(((Math.random() - 0.3) * 30).toFixed(2)));
+        const cls = mockReturn >= 0 ? 'positive' : 'negative';
+        const sign = mockReturn >= 0 ? '+' : '';
+        return `<p style="margin: 6px 0; display: flex; justify-content: space-between;">
+            <strong>${name}</strong>
+            <span class="stat-value ${cls}">${sign}${mockReturn}%</span>
+        </p>`;
+    }).join('');
+
+    const assetDailyReturnHtml = assets.map(asset => {
+        const name = typeof asset === 'string' ? asset : (asset.name ?? '알 수 없음');
+        const dr = (typeof asset !== 'string' && asset.dailyReturn != null)
+            ? asset.dailyReturn
+            : parseFloat(((Math.random() - 0.4) * 4).toFixed(2));
+        const cls = dr >= 0 ? 'positive' : 'negative';
+        const sign = dr >= 0 ? '+' : '';
+        return `<p style="margin: 6px 0; display: flex; justify-content: space-between;">
+            <strong>${name}</strong>
+            <span class="stat-value ${cls}">${sign}${dr}%</span>
+        </p>`;
+    }).join('');
+
+    // 섹션 5: 마을별 최신 뉴스
+    const news = villageNewsMap[village.type] || villageNewsMap['growth'];
+    const newsHtml = news.map(n => `
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--light);">
+            <p style="font-weight: 700; margin-bottom: 4px;">${n.title}</p>
+            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 4px;">${n.summary}</p>
+            <p style="color: var(--text-light); font-size: 12px;">🕐 ${n.time}</p>
+        </div>
+    `).join('');
+
+    // 섹션 6: 오늘의 AI 조언
+    const villageAdvice = getVillageAdvice(village);
+    const marketAdvice = getMarketAdvice(village);
 
     return `
         <div class="briefing-section">
-            <h3>🏘️ ${village.name} 현황</h3>
-            <p>주인님, 좋은 아침입니다! ${village.name}의 현재 상황을 알려드립니다.</p>
-            <p><strong>총 자산:</strong> ${village.totalValue.toLocaleString()}원</p>
-            <p><strong>수익률:</strong> <span class="stat-value ${returnClass}">${returnSign}${village.returnRate}%</span></p>
-            <p><strong>포트폴리오 비중:</strong> ${village.allocation}%</p>
+            <h3>📊 마을 총 수익률</h3>
+            <p><strong>총 수익률:</strong> <span class="stat-value ${returnClass}">${returnSign}${returnRate}%</span></p>
+            <p><strong>평가손익:</strong> <span class="stat-value ${profitLossClass}">${profitLossSign}${profitLoss.toLocaleString()}원</span></p>
+            <p><strong>총 자산:</strong> ${totalValue.toLocaleString()}원</p>
         </div>
 
         <div class="briefing-section">
-            <h3>💼 보유 자산 분석</h3>
-            ${village.assets.map(asset => {
-                const assetName = typeof asset === 'string' ? asset : asset.name;
-                const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
-
-                // 전일자 시가/종가 수익률 표시
-                let returnInfo = '';
-                if (asset.dailyReturn !== undefined && asset.dailyReturn !== null) {
-                    const returnClass = asset.dailyReturn >= 0 ? 'positive' : 'negative';
-                    const returnSign = asset.dailyReturn >= 0 ? '+' : '';
-                    returnInfo = ` <span class="stat-value ${returnClass}">[전일 ${returnSign}${asset.dailyReturn}%]</span>`;
-                }
-
-                return `<p>• <strong>${assetName}</strong>${assetType}${returnInfo} - 안정적으로 운영 중입니다.</p>`;
-            }).join('')}
+            <h3>📈 전일대비 등락</h3>
+            <p><strong>마을 전일대비:</strong> <span class="stat-value ${dailyClass}">${dailySign}${villageDailyReturn}%</span></p>
         </div>
 
         <div class="briefing-section">
-            <h3>📊 투자 전략</h3>
-            <p><strong>투자 유형:</strong> ${getVillageTypeText(village.type)}</p>
-            <p><strong>투자 목표:</strong> ${getVillageGoalText(village.goal)}</p>
+            <h3>💼 보유 종목별 총 수익률</h3>
+            ${assetTotalReturnHtml || '<p>보유 자산이 없습니다.</p>'}
         </div>
 
         <div class="briefing-section">
-            <h3>💡 오늘의 조언</h3>
-            <p>${getVillageAdvice(village)}</p>
-            ${getMarketAdvice(village)}
+            <h3>📉 보유 종목별 전일대비 등락</h3>
+            ${assetDailyReturnHtml || '<p>보유 자산이 없습니다.</p>'}
         </div>
 
         <div class="briefing-section">
-            <h3>📅 금일 체크리스트</h3>
-            <p>✓ 시장 변동성 모니터링</p>
-            <p>✓ 주요 뉴스 확인</p>
-            <p>✓ 리밸런싱 필요 여부 검토</p>
+            <h3>📰 마을 최신 뉴스</h3>
+            ${newsHtml}
+        </div>
+
+        <div class="briefing-section">
+            <h3>🤖 오늘의 AI 조언</h3>
+            <p>${villageAdvice}</p>
+            ${marketAdvice}
         </div>
     `;
 }
@@ -512,6 +710,44 @@ function getMarketAdvice(village) {
         'semiconductor': '<p style="margin-top: 10px;">🔬 반도체 업황 지표와 수주 동향을 체크하세요.</p>'
     };
     return adviceMap[village.type] || '';
+}
+
+// AI 포트폴리오 리밸런싱 내용 생성
+function generateRebalancingContent(village) {
+    const totalAllocation = village.assets.length > 0 ? 100 : 0;
+    const idealAllocation = village.assets.length > 0 ? Math.round(100 / village.assets.length) : 0;
+
+    const rebalancingMap = {
+        'growth': { suggestion: '성장주 비중이 높습니다. 방어주나 채권 ETF를 일부 편입하여 변동성을 줄이는 것을 권장합니다.', action: '성장주 비중 축소 → 가치주/채권 편입' },
+        'dividend': { suggestion: '배당주 포트폴리오가 안정적입니다. 배당 성장률이 높은 종목으로 일부 교체를 고려하세요.', action: '저배당 종목 매도 → 고배당 성장주 매수' },
+        'leverage': { suggestion: '레버리지 상품은 장기 보유 시 손실이 커질 수 있습니다. 정기적인 리밸런싱이 필수입니다.', action: '레버리지 비중 조절 → 인버스 헷지 검토' },
+        'domestic': { suggestion: '국내 주식 편중도가 높습니다. 해외 자산을 추가하여 지역 분산을 고려하세요.', action: '국내 비중 축소 → 해외 ETF 편입' },
+        'etf': { suggestion: 'ETF 포트폴리오가 잘 분산되어 있습니다. 섹터별 비중을 점검하세요.', action: '섹터 비중 재조정 → 저평가 섹터 확대' },
+        'semiconductor': { suggestion: '반도체 섹터 집중도가 높습니다. 다른 기술 섹터로 분산을 권장합니다.', action: '반도체 비중 축소 → AI/소프트웨어 편입' }
+    };
+
+    const info = rebalancingMap[village.type] || { suggestion: '현재 포트폴리오의 자산 비중을 점검하고 목표 비중과의 차이를 확인하세요.', action: '목표 비중 대비 괴리 종목 조정' };
+
+    let assetBalanceHtml = village.assets.map(asset => {
+        const assetName = typeof asset === 'string' ? asset : asset.name;
+        const currentWeight = idealAllocation + Math.round((Math.random() - 0.5) * 10);
+        const diff = currentWeight - idealAllocation;
+        const diffSign = diff >= 0 ? '+' : '';
+        const diffColor = Math.abs(diff) > 5 ? 'var(--danger)' : 'var(--success)';
+        return `<p style="margin: 6px 0;">• <strong>${assetName}</strong>: 현재 ${currentWeight}% → 목표 ${idealAllocation}% <span style="color: ${diffColor}; font-weight: 600;">(${diffSign}${diff}%)</span></p>`;
+    }).join('');
+
+    return `
+        <div style="background: linear-gradient(135deg, rgba(255,107,53,0.05), rgba(255,210,63,0.05)); border-radius: 12px; padding: 18px; margin-bottom: 15px;">
+            <p style="font-weight: 600; color: var(--primary); margin-bottom: 8px;">💡 리밸런싱 제안</p>
+            <p>${info.suggestion}</p>
+            <p style="margin-top: 10px; color: var(--text-light);"><strong>추천 액션:</strong> ${info.action}</p>
+        </div>
+        <div>
+            <p style="font-weight: 600; margin-bottom: 10px;">📊 종목별 비중 분석</p>
+            ${assetBalanceHtml}
+        </div>
+    `;
 }
 
 // 마을 선택기로 돌아가기

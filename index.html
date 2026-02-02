@@ -88,7 +88,7 @@
                 <button onclick="showPage('main')">홈</button>
                 <button onclick="showPage('villages')">마을 관리</button>
                 <button onclick="showPage('analysis')">포트폴리오 분석</button>
-                <button onclick="showPage('briefing')">아침 브리핑</button>
+                <button onclick="showPage('briefing')">일일 브리핑</button>
                 <button onclick="showPage('neighbors')">이웃 개미</button>
                 <button onclick="showPage('mypage')">마이페이지</button>
                 <button onclick="logout()" class="logout-button">로그아웃</button>
@@ -122,7 +122,7 @@
                 </button>
                 <button onclick="showPage('briefing'); closeMobileMenu();">
                     <span class="nav-icon">📢</span>
-                    <span>아침 브리핑</span>
+                    <span>일일 브리핑</span>
                 </button>
                 <button onclick="showPage('neighbors'); closeMobileMenu();">
                     <span class="nav-icon">👥</span>
@@ -338,7 +338,7 @@
     <!-- 아침 브리핑 페이지 -->
     <div id="briefingPage" class="page">
         <div class="container">
-            <h1 class="page-title">개미 아침 브리핑</h1>
+            <h1 class="page-title">개미 일일 브리핑</h1>
             <p class="page-subtitle">마을별 대표 개미를 선택하고 브리핑을 들어보세요</p>
 
             <div class="briefing-container">
@@ -371,43 +371,71 @@
         </div>
     </div>
 
-    <!-- 마을별 정기 브리핑 페이지 -->
+    <!-- 마을 분석 페이지 -->
     <div id="dailyBriefingPage" class="page">
         <div class="container">
-            <h1 class="page-title">마을별 정기 브리핑</h1>
-            <p class="page-subtitle">시간대별 맞춤 정보 제공</p>
+            <h1 class="page-title">마을 분석</h1>
+            <p class="page-subtitle">마을의 수익률과 성과를 분석합니다</p>
 
-            <div class="briefing-container">
-                <div class="ant-character">
-                    <div class="ant-avatar">🏘️</div>
-                    <div class="ant-name" id="dailyVillageName">미장마을</div>
-                </div>
+            <!-- 마을 정보 헤더 -->
+            <div style="text-align: center; margin: 30px 0;">
+                <div class="ant-avatar" style="font-size: 80px; margin-bottom: 20px;">🏘️</div>
+                <h2 class="ant-name" id="dailyVillageName" style="font-size: 32px; color: var(--primary); margin-bottom: 25px;">미장마을</h2>
 
-                <div class="briefing-content" id="dailyBriefingContent">
-                    <div class="briefing-section">
-                        <h3>🌅 장전 브리핑 (오전 8시)</h3>
-                        <p>미장마을의 오늘 전망입니다.</p>
-                        <p>선물 지수는 +0.5% 상승 중이며, 긍정적인 출발이 예상됩니다.</p>
-                    </div>
-
-                    <div class="briefing-section">
-                        <h3>⚡ 레버리지마을 특별 경고</h3>
-                        <p style="color: var(--danger); font-weight: 700;">변동성 지수(VIX)가 18.5로 상승했습니다.</p>
-                        <p>레버리지 포지션 점검을 권장드립니다.</p>
-                    </div>
-
-                    <div class="briefing-section">
-                        <h3>💰 배당마을 D-Day 알림</h3>
-                        <p>SCHD 배당락일까지 <strong>3일</strong> 남았습니다.</p>
-                        <p>예상 배당 수익: $127.50</p>
+                <!-- 요약 정보 카드 -->
+                <div style="background: var(--card-bg); border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px;">
+                        <div class="village-summary-item">
+                            <div style="color: var(--text-light); font-size: 15px; margin-bottom: 10px; font-weight: 500;">💰 총 자산</div>
+                            <div id="villageAnalysisTotalValue" style="font-size: 28px; font-weight: 700; color: var(--dark);">0원</div>
+                        </div>
+                        <div class="village-summary-item">
+                            <div style="color: var(--text-light); font-size: 15px; margin-bottom: 10px; font-weight: 500;">📈 현재 수익률</div>
+                            <div id="villageAnalysisReturnRate" style="font-size: 28px; font-weight: 700;">0%</div>
+                        </div>
+                        <div class="village-summary-item">
+                            <div style="color: var(--text-light); font-size: 15px; margin-bottom: 10px; font-weight: 500;">📊 보유 종목</div>
+                            <div id="villageAnalysisAssetCount" style="font-size: 28px; font-weight: 700; color: var(--dark);">0개</div>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="audio-controls">
-                    <button class="audio-button" onclick="playDailyBriefing()">🔊 음성으로 듣기</button>
-                    <button class="audio-button" onclick="stopBriefing()">⏹️ 정지</button>
-                    <button class="audio-button" onclick="showPage('main')">메인으로 돌아가기</button>
+            <!-- 수익률 차트 -->
+            <div style="background: var(--card-bg); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 30px;">
+                <h2 style="color: var(--primary); font-size: 24px; font-weight: 700; margin-bottom: 20px;">📊 월별 수익률 추이</h2>
+                <div style="position: relative; height: 400px;">
+                    <canvas id="villageReturnChart"></canvas>
                 </div>
+            </div>
+
+            <!-- 마을 정보 -->
+            <div class="briefing-content" id="dailyBriefingContent">
+                <div class="briefing-section">
+                    <h3>💼 보유 자산</h3>
+                    <div id="villageAnalysisAssets" style="margin-top: 15px;">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="briefing-section">
+                    <h3>🤖 AI 포트폴리오 분석</h3>
+                    <div id="villageAnalysisAdvice">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+
+                <div class="briefing-section">
+                    <h3>⚖️ AI 포트폴리오 리밸런싱</h3>
+                    <div id="villageAnalysisRebalancing">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="audio-controls">
+                <button class="audio-button" onclick="showPage('villages')" style="background: var(--primary);">마을 관리로 돌아가기</button>
+                <button class="audio-button" onclick="showPage('main')" style="background: var(--text-light);">메인으로 돌아가기</button>
             </div>
         </div>
     </div>

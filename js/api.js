@@ -98,7 +98,7 @@ async function fetchAPI(endpoint, options = {}) {
                 recommendations: sampleData.recommendation.recommendedVillages
             };
         }
-
+        
         // 데일리 브리핑
         if (endpoint === '/daily') {
             // 배당마을 데이터 사용
