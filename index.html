@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- 로그인 페이지 -->
@@ -76,6 +79,7 @@
             <nav class="desktop-nav">
                 <button onclick="showPage('main')">홈</button>
                 <button onclick="showPage('villages')">마을 관리</button>
+                <button onclick="showPage('analysis')">포트폴리오 분석</button>
                 <button onclick="showPage('briefing')">아침 브리핑</button>
                 <button onclick="showPage('neighbors')">이웃 개미</button>
                 <button onclick="showPage('mypage')">마이페이지</button>
@@ -103,6 +107,10 @@
                 <button onclick="showPage('villages'); closeMobileMenu();">
                     <span class="nav-icon">🏘️</span>
                     <span>마을 관리</span>
+                </button>
+                <button onclick="showPage('analysis'); closeMobileMenu();">
+                    <span class="nav-icon">📊</span>
+                    <span>포트폴리오 분석</span>
                 </button>
                 <button onclick="showPage('briefing'); closeMobileMenu();">
                     <span class="nav-icon">📢</span>
@@ -212,6 +220,99 @@
 
             <div class="village-grid" id="villageGrid">
                 <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 포트폴리오 분석 페이지 -->
+    <div id="analysisPage" class="page">
+        <div class="container">
+            <div class="analysis-header">
+                <div>
+                    <h1 class="page-title">포트폴리오 분석</h1>
+                    <p class="page-subtitle">나의 투자 현황을 한눈에 분석하세요</p>
+                </div>
+                <div class="download-buttons">
+                    <button class="download-btn excel" onclick="downloadExcel()">
+                        <span class="download-icon">📊</span>
+                        <span>Excel 다운로드</span>
+                    </button>
+                    <button class="download-btn pdf" onclick="downloadPDF()">
+                        <span class="download-icon">📄</span>
+                        <span>PDF 다운로드</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 요약 카드 섹션 -->
+            <div class="analysis-summary-grid">
+                <div class="analysis-card">
+                    <div class="analysis-card-icon">💰</div>
+                    <div class="analysis-card-label">총 자산</div>
+                    <div class="analysis-card-value" id="analysisTotalAssets">0원</div>
+                    <div class="analysis-card-change positive" id="analysisAssetChange">+0원 (0%)</div>
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-card-icon">📈</div>
+                    <div class="analysis-card-label">총 수익률</div>
+                    <div class="analysis-card-value" id="analysisTotalReturn">0%</div>
+                    <div class="analysis-card-change positive" id="analysisReturnChange">전월 대비 +0%p</div>
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-card-icon">🏘️</div>
+                    <div class="analysis-card-label">운영 마을</div>
+                    <div class="analysis-card-value" id="analysisVillageCount">0개</div>
+                    <div class="analysis-card-change" id="analysisVillageInfo">0개 자산 보유</div>
+                </div>
+                <div class="analysis-card">
+                    <div class="analysis-card-icon">⚡</div>
+                    <div class="analysis-card-label">리스크 등급</div>
+                    <div class="analysis-card-value" id="analysisRiskLevel">중립</div>
+                    <div class="analysis-card-change" id="analysisRiskDesc">균형잡힌 포트폴리오</div>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="analysis-charts-grid">
+                <!-- 마을별 수익률 차트 -->
+                <div class="analysis-chart-card">
+                    <h2 class="analysis-section-title">마을별 수익률</h2>
+                    <div class="chart-container-analysis">
+                        <canvas id="villagePerformanceChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- 자산 유형별 분포 -->
+                <div class="analysis-chart-card">
+                    <h2 class="analysis-section-title">자산 유형 분포</h2>
+                    <div class="chart-container-analysis">
+                        <canvas id="assetTypeDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 상위/하위 종목 -->
+            <div class="analysis-performance-grid">
+                <div class="performance-card">
+                    <h2 class="analysis-section-title">🏆 수익률 TOP 5</h2>
+                    <div class="performance-list" id="topPerformers">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+                <div class="performance-card">
+                    <h2 class="analysis-section-title">📉 수익률 BOTTOM 5</h2>
+                    <div class="performance-list" id="bottomPerformers">
+                        <!-- JavaScript로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 리밸런싱 추천 -->
+            <div class="rebalancing-section">
+                <h2 class="analysis-section-title">💡 리밸런싱 추천</h2>
+                <div class="rebalancing-cards" id="rebalancingRecommendations">
+                    <!-- JavaScript로 동적 생성 -->
+                </div>
             </div>
         </div>
     </div>
