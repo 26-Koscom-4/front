@@ -893,10 +893,19 @@ header .container {
     margin-bottom: 30px;
 }
 
+/* 메인 컨텐츠 래퍼 (지도, 차트, 요약을 같은 라인에 표시) */
+.main-content-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 25px;
+    max-width: 1600px;
+    margin: 40px auto;
+    padding: 0 20px;
+    align-items: flex-start;
+}
+
 /* 세계 지도 (이미지 기반) */
 .world-map {
-    max-width: 900px;
-    margin: 40px auto;
     background: var(--card-bg);
     padding: 30px;
     border-radius: 20px;
@@ -1078,31 +1087,35 @@ header .container {
 
 /* 자산 차트 섹션 */
 .asset-chart-section {
-    max-width: 1000px;
-    margin: 60px auto;
     background: var(--card-bg);
-    padding: 50px 40px;
+    padding: 30px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-.chart-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 50px;
-    align-items: center;
-    margin-top: 40px;
+/* 자산 요약 섹션 */
+.asset-summary-section {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
 }
 
 .chart-container {
     position: relative;
     width: 100%;
     max-width: 400px;
-    margin: 0 auto;
+    margin: 20px auto 0;
 }
 
 .chart-legend {
-    padding: 20px;
+    width: 100%;
+    margin-top: 20px;
 }
 
 .chart-legend h3 {
@@ -1123,6 +1136,27 @@ header .container {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.legend-items::-webkit-scrollbar {
+    width: 8px;
+}
+
+.legend-items::-webkit-scrollbar-track {
+    background: var(--light);
+    border-radius: 10px;
+}
+
+.legend-items::-webkit-scrollbar-thumb {
+    background: var(--primary);
+    border-radius: 10px;
+}
+
+.legend-items::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
 }
 
 .legend-item {
@@ -1160,7 +1194,9 @@ header .container {
 }
 
 .legend-icon {
-    font-size: 24px;
+    font-size: 32px;
+    min-width: 40px;
+    text-align: center;
 }
 
 .legend-item-right {
@@ -1488,6 +1524,20 @@ header .container {
 }
 
 /* 반응형 */
+/* 태블릿 (중간 화면) */
+@media (max-width: 1200px) {
+    .main-content-wrapper {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    /* 자산 요약 섹션을 전체 너비로 */
+    .asset-summary-section {
+        grid-column: 1 / -1;
+    }
+}
+
+/* 모바일 (작은 화면) */
 @media (max-width: 768px) {
     /* 히어로 섹션 */
     .hero {
@@ -1654,6 +1704,14 @@ header .container {
         font-size: 15px;
     }
 
+    /* 메인 컨텐츠 래퍼 - 모바일에서는 세로로 쌓기 */
+    .main-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 15px;
+        margin: 20px auto;
+    }
+
     .world-map {
         padding: 20px 15px;
     }
@@ -1688,13 +1746,19 @@ header .container {
 
     /* 차트 섹션 */
     .asset-chart-section {
-        padding: 30px 20px;
-        margin: 40px auto;
+        padding: 20px 15px;
     }
 
-    .chart-wrapper {
-        grid-template-columns: 1fr;
-        gap: 30px;
+    .asset-summary-section {
+        padding: 20px 15px;
+    }
+
+    .chart-container {
+        max-width: 300px;
+    }
+
+    .legend-items {
+        max-height: 300px;
     }
 
     .total-assets {

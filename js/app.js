@@ -1,3 +1,163 @@
+// ========== API 설정 ==========
+// 실제 API 연결 (주석처리됨 - 목업 데이터 사용 중)
+/*
+const API_BASE_URL = 'http://localhost:8000/api';
+
+// API 호출 유틸리티 함수
+async function fetchAPI(endpoint, options = {}) {
+    try {
+        const url = `${API_BASE_URL}${endpoint}`;
+        const headers = {
+            'Content-Type': 'application/json',
+        };
+
+        // 인증 토큰이 있으면 헤더에 추가
+        const accessToken = localStorage.getItem('accessToken');
+        if (accessToken) {
+            headers['Authorization'] = `Bearer ${accessToken}`;
+        }
+
+        const defaultOptions = {
+            headers: headers,
+        };
+
+        const response = await fetch(url, { ...defaultOptions, ...options, headers: { ...headers, ...options.headers } });
+
+        if (!response.ok) {
+            // 401 Unauthorized인 경우 로그인 페이지로 이동
+            if (response.status === 401) {
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('accessToken');
+                showLoginPage();
+                throw new Error('인증이 필요합니다. 다시 로그인해주세요.');
+            }
+            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error('API 호출 오류:', error);
+        if (!error.message.includes('인증이 필요합니다')) {
+            showToast(`API 오류: ${error.message}`, 'error');
+        }
+        throw error;
+    }
+}
+*/
+
+// ========== 목업 API (Mock API) ==========
+// 실제 서버 없이 동작하도록 목업 데이터 사용
+async function fetchAPI(endpoint, options = {}) {
+    // 실제 API 호출을 시뮬레이션하기 위한 지연
+    await new Promise(resolve => setTimeout(resolve, 300));
+
+    console.log(`[MOCK API] ${options.method || 'GET'} ${endpoint}`);
+
+    try {
+        // 마을 목록 조회
+        if (endpoint === '/villages' && (!options.method || options.method === 'GET')) {
+            return { villages: sampleData.villages };
+        }
+
+        // 마을 추가
+        if (endpoint === '/villages' && options.method === 'POST') {
+            const newVillage = JSON.parse(options.body);
+            console.log('[MOCK API] 새 마을 추가:', newVillage);
+            return { success: true, village: newVillage };
+        }
+
+        // 특정 마을 상세 정보
+        if (endpoint.startsWith('/villages/')) {
+            const villageId = endpoint.split('/')[2];
+            const village = sampleData.villages.find(v => v.id === villageId || v.name === villageId);
+            return village || sampleData.villages[0];
+        }
+
+        // 브리핑 데이터
+        if (endpoint === '/briefing') {
+            return {
+                villages: sampleData.villages.map(v => ({
+                    id: v.id,
+                    name: v.name,
+                    icon: v.icon,
+                    returnRate: v.returnRate,
+                    briefing: `${v.name}의 오늘 브리핑입니다. 현재 수익률은 ${v.returnRate}%입니다.`
+                }))
+            };
+        }
+
+        // 이웃 개미 추천
+        if (endpoint === '/neighbors') {
+            return {
+                recommendations: sampleData.recommendation.recommendedVillages
+            };
+        }
+
+        // 데일리 브리핑
+        if (endpoint === '/daily') {
+            return {
+                briefing_content: `
+                    <div class="briefing-section">
+                        <h3>🌅 장전 브리핑 (오전 8시)</h3>
+                        <p>미장마을의 오늘 전망입니다.</p>
+                        <p>선물 지수는 +0.5% 상승 중이며, 긍정적인 출발이 예상됩니다.</p>
+                    </div>
+                    <div class="briefing-section">
+                        <h3>⚡ 레버리지마을 특별 경고</h3>
+                        <p style="color: var(--danger); font-weight: 700;">변동성 지수(VIX)가 18.5로 상승했습니다.</p>
+                        <p>레버리지 포지션 점검을 권장드립니다.</p>
+                    </div>
+                `
+            };
+        }
+
+        // 메인 페이지 데이터
+        if (endpoint === '/main') {
+            return {
+                villages: sampleData.villages,
+                recommendation: sampleData.recommendation
+            };
+        }
+
+        // 마이페이지 데이터
+        if (endpoint === '/mypage') {
+            return {
+                userProfile: sampleData.userProfile,
+                settings: sampleData.settings,
+                villages: sampleData.villages,
+                investment_test: {
+                    completed: false
+                }
+            };
+        }
+
+        // 로그인
+        if (endpoint === '/login' && options.method === 'POST') {
+            const credentials = JSON.parse(options.body);
+            return {
+                success: true,
+                accessToken: 'mock-token-' + Date.now(),
+                user: {
+                    name: credentials.username || '김직장'
+                }
+            };
+        }
+
+        // 로그아웃
+        if (endpoint === '/logout' && options.method === 'POST') {
+            return { success: true };
+        }
+
+        // 기본 응답
+        return { success: true };
+
+    } catch (error) {
+        console.error('[MOCK API] 오류:', error);
+        throw error;
+    }
+}
+
 // ========== Toast 알림 시스템 ==========
 function showToast(message, type = 'success') {
     const toast = document.createElement('div');
@@ -85,9 +245,10 @@ function showConfirmModal(options) {
     };
 }
 
-// 샘플 데이터 초기화
+// ========== 목업 데이터 (Mock Data) ==========
+// 실제 서버 없이 동작하도록 사용되는 샘플 데이터
 const sampleData = {
-    user_profile: {
+    userProfile: {
         name: "김직장",
         theme: "light"
     },
@@ -201,35 +362,12 @@ const sampleData = {
     }
 };
 
-// LocalStorage 초기화 및 데이터 검증
-function initializeData() {
-    const storedData = localStorage.getItem('antVillageData');
+// 페이지 로드 시 초기화
+// sampleData는 목업 API에서 사용됩니다
 
-    if (!storedData) {
-        // 데이터가 없으면 샘플 데이터로 초기화
-        console.log('LocalStorage 초기화: 샘플 데이터 로드');
-        localStorage.setItem('antVillageData', JSON.stringify(sampleData));
-        return;
-    }
-
-    try {
-        const data = JSON.parse(storedData);
-        // 데이터 구조 검증
-        if (!data.villages || !Array.isArray(data.villages) || data.villages.length === 0) {
-            console.log('데이터 구조 오류: 샘플 데이터로 재설정');
-            localStorage.setItem('antVillageData', JSON.stringify(sampleData));
-        }
-    } catch (e) {
-        console.error('LocalStorage 데이터 파싱 오류:', e);
-        localStorage.setItem('antVillageData', JSON.stringify(sampleData));
-    }
-}
-
-// 페이지 로드 시 데이터 초기화
-initializeData();
-
-// 데이터 로드
+// [DEPRECATED] 레거시 함수 - API 기반으로 변경되었습니다
 function loadData() {
+    console.warn('loadData()는 더 이상 사용되지 않습니다. API를 사용하세요.');
     const data = localStorage.getItem('antVillageData');
     return data ? JSON.parse(data) : sampleData;
 }
@@ -241,13 +379,14 @@ function resetData() {
     location.reload();
 }
 
-// 데이터 저장
+// [DEPRECATED] 레거시 함수 - API 기반으로 변경되었습니다
 function saveData(data) {
+    console.warn('saveData()는 더 이상 사용되지 않습니다. API를 사용하세요.');
     localStorage.setItem('antVillageData', JSON.stringify(data));
 }
 
 // 페이지 전환
-function showPage(pageName) {
+async function showPage(pageName) {
     // 스크롤을 상단으로 이동
     window.scrollTo(0, 0);
 
@@ -276,17 +415,24 @@ function showPage(pageName) {
     // 네비게이션 활성 상태 업데이트
     updateNavigationState(pageName);
 
-    // 페이지별 초기화
-    if (pageName === 'villages') {
-        renderVillages();
-    } else if (pageName === 'main') {
-        renderAssetChart();
-        renderMapBadges();
-        renderRecommendationBanner();
-    } else if (pageName === 'mypage') {
-        loadMypage();
-    } else if (pageName === 'briefing') {
-        renderVillageSelector();
+    // 페이지별 API 데이터 로드 및 초기화
+    try {
+        if (pageName === 'villages') {
+            await renderVillages();
+        } else if (pageName === 'main') {
+            await renderMain();
+        } else if (pageName === 'mypage') {
+            await loadMypage();
+        } else if (pageName === 'briefing') {
+            await renderBriefing();
+        } else if (pageName === 'neighbors') {
+            await renderNeighbors();
+        } else if (pageName === 'daily') {
+            await renderDaily();
+        }
+    } catch (error) {
+        console.error('페이지 로드 오류:', error);
+        showToast('페이지 로드 중 오류가 발생했습니다.', 'error');
     }
 }
 
@@ -325,56 +471,66 @@ function updateNavigationState(pageName) {
 }
 
 // 마을 카드 렌더링
-function renderVillages() {
-    const data = loadData();
+async function renderVillages() {
     const grid = document.getElementById('villageGrid');
-    grid.innerHTML = '';
+    grid.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
 
-    data.villages.forEach(village => {
-        const card = document.createElement('div');
-        card.className = 'village-card fade-in';
-        card.onclick = () => showVillageDetail(village.name);
+    try {
+        const data = await fetchAPI('/villages');
+        grid.innerHTML = '';
 
-        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
-        const returnSign = village.returnRate >= 0 ? '+' : '';
+        if (!data.villages || data.villages.length === 0) {
+            grid.innerHTML = '<div style="text-align: center; padding: 40px;">마을이 없습니다.</div>';
+            return;
+        }
 
-        card.innerHTML = `
-            <div class="village-header">
-                <div class="village-name">${village.name}</div>
-                <div class="village-icon">${village.icon}</div>
-            </div>
-            <div class="village-stats">
-                <div class="stat-row">
-                    <span class="stat-label">총 자산</span>
-                    <span class="stat-value">${village.totalValue.toLocaleString()}원</span>
+        data.villages.forEach(village => {
+            const card = document.createElement('div');
+            card.className = 'village-card fade-in';
+            card.onclick = () => showVillageDetail(village.id, village.name);
+
+            const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+            const returnSign = village.returnRate >= 0 ? '+' : '';
+
+            card.innerHTML = `
+                <div class="village-header">
+                    <div class="village-name">${village.name}</div>
+                    <div class="village-icon">${village.icon}</div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">수익률</span>
-                    <span class="stat-value ${returnClass}">${returnSign}${village.returnRate}%</span>
+                <div class="village-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">총 자산</span>
+                        <span class="stat-value">${village.totalValue.toLocaleString()}원</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">수익률</span>
+                        <span class="stat-value ${returnClass}">${returnSign}${village.returnRate}%</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">포트폴리오 비중</span>
+                        <span class="stat-value">${village.allocation}%</span>
+                    </div>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">포트폴리오 비중</span>
-                    <span class="stat-value">${village.allocation}%</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${village.allocation}%"></div>
                 </div>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" style="width: ${village.allocation}%"></div>
-            </div>
-            <div class="assets-list">
-                ${village.assets.map(asset => `<span class="asset-tag">${typeof asset === 'string' ? asset : asset.name}</span>`).join('')}
-            </div>
-        `;
+                <div class="assets-list">
+                    ${village.assets.map(asset => `<span class="asset-tag">${typeof asset === 'string' ? asset : asset.name}</span>`).join('')}
+                </div>
+            `;
 
-        grid.appendChild(card);
-    });
+            grid.appendChild(card);
+        });
+    } catch (error) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">마을 목록을 불러오는데 실패했습니다.</div>';
+    }
 }
 
 // 마을 상세 정보 모달
-function showVillageDetail(villageName) {
-    const data = loadData();
-    const village = data.villages.find(v => v.name === villageName);
+async function showVillageDetail(villageId, villageName) {
+    try {
+        const village = await fetchAPI(`/villages/${villageId}`);
 
-    if (village) {
         const modal = document.getElementById('villageModal');
         const content = document.getElementById('modalContent');
 
@@ -437,8 +593,9 @@ function showVillageDetail(villageName) {
         `;
 
         modal.classList.add('active');
-    } else {
-        showToast('해당 마을을 찾을 수 없습니다.', 'error');
+    } catch (error) {
+        console.error('마을 상세 정보 로드 오류:', error);
+        showToast('마을 정보를 불러오는데 실패했습니다.', 'error');
     }
 }
 
@@ -539,8 +696,8 @@ function isBriefingUnread(village) {
 }
 
 // 지도 뱃지 렌더링
-function renderMapBadges() {
-    const data = loadData();
+function renderMapBadges(mainData = null) {
+    if (!mainData || !mainData.villages) return;
 
     // 마을 이름과 뱃지 ID 매핑
     const villageBadgeMap = {
@@ -551,7 +708,7 @@ function renderMapBadges() {
     };
 
     // 각 마을의 읽음 상태 확인
-    data.villages.forEach(village => {
+    mainData.villages.forEach(village => {
         const badgeId = villageBadgeMap[village.name];
         if (badgeId) {
             const badge = document.getElementById(badgeId);
@@ -605,41 +762,56 @@ function getVillageAdvice(village) {
     return adviceMap[village.type] || '꾸준한 모니터링과 리밸런싱을 권장합니다.';
 }
 
+// 브리핑 페이지 렌더링
+async function renderBriefing() {
+    await renderVillageSelector();
+}
+
 // 마을 선택기 렌더링
-function renderVillageSelector() {
-    const data = loadData();
+async function renderVillageSelector() {
     const grid = document.getElementById('villageSelectorGrid');
 
     if (!grid) return;
 
-    grid.innerHTML = '';
+    grid.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
 
-    data.villages.forEach(village => {
-        const card = document.createElement('div');
-        card.className = 'village-selector-card';
-        card.onclick = () => selectVillageForBriefing(village.name);
+    try {
+        const data = await fetchAPI('/briefing');
+        grid.innerHTML = '';
 
-        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
-        const returnSign = village.returnRate >= 0 ? '+' : '';
+        if (!data.villages || data.villages.length === 0) {
+            grid.innerHTML = '<div style="text-align: center; padding: 40px;">마을이 없습니다.</div>';
+            return;
+        }
 
-        card.innerHTML = `
-            <div class="village-selector-icon">${village.icon}</div>
-            <div class="village-selector-name">${village.name}</div>
-            <div class="village-selector-return ${returnClass}">${returnSign}${village.returnRate}%</div>
-        `;
+        data.villages.forEach(village => {
+            const card = document.createElement('div');
+            card.className = 'village-selector-card';
+            card.onclick = () => selectVillageForBriefing(village.name, village);
 
-        grid.appendChild(card);
-    });
+            const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+            const returnSign = village.returnRate >= 0 ? '+' : '';
 
-    // 브리핑 컨텐츠 숨기기
-    document.getElementById('selectedVillageBriefing').style.display = 'none';
-    document.querySelector('.village-selector').style.display = 'block';
+            card.innerHTML = `
+                <div class="village-selector-icon">${village.icon}</div>
+                <div class="village-selector-name">${village.name}</div>
+                <div class="village-selector-return ${returnClass}">${returnSign}${village.returnRate}%</div>
+            `;
+
+            grid.appendChild(card);
+        });
+
+        // 브리핑 컨텐츠 숨기기
+        document.getElementById('selectedVillageBriefing').style.display = 'none';
+        document.querySelector('.village-selector').style.display = 'block';
+    } catch (error) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">브리핑 데이터 로드에 실패했습니다.</div>';
+    }
 }
 
 // 마을 선택 시 브리핑 표시
-function selectVillageForBriefing(villageName) {
-    const data = loadData();
-    const village = data.villages.find(v => v.name === villageName);
+function selectVillageForBriefing(villageName, villageData = null) {
+    const village = villageData;
 
     if (!village) return;
 
@@ -718,6 +890,33 @@ function showVillageSelector() {
     renderVillageSelector();
 }
 
+// 이웃 개미 페이지 렌더링
+async function renderNeighbors() {
+    try {
+        const data = await fetchAPI('/neighbors');
+        // 이웃 개미 페이지는 현재 정적 콘텐츠이므로 데이터만 로드
+        console.log('이웃 개미 데이터 로드 완료:', data);
+    } catch (error) {
+        console.error('이웃 개미 데이터 로드 오류:', error);
+    }
+}
+
+// 데일리 브리핑 페이지 렌더링
+async function renderDaily() {
+    try {
+        const data = await fetchAPI('/daily');
+        // 데일리 브리핑 데이터 표시
+        if (data.briefing_content) {
+            const contentElement = document.getElementById('dailyBriefingContent');
+            if (contentElement) {
+                contentElement.innerHTML = data.briefing_content;
+            }
+        }
+    } catch (error) {
+        console.error('데일리 브리핑 로드 오류:', error);
+    }
+}
+
 // TTS 음성 브리핑
 let speechSynthesis = window.speechSynthesis;
 let currentUtterance = null;
@@ -758,67 +957,46 @@ function playDailyBriefing() {
 }
 
 // 마을 추가
-function addVillage(villageName) {
-    showToast(`"${villageName}"이(가) 내 포트폴리오에 추가되었습니다! 🎉`);
+async function addVillage(villageName) {
+    try {
+        const newVillage = {
+            name: villageName,
+            icon: villageName.includes('원자재') ? '🏆' : (villageName.includes('신흥국') ? '🌏' : '🏦'),
+            type: "new",
+            goal: "diversification"
+        };
 
-    const data = loadData();
-    const newVillage = {
-        id: `v${data.villages.length + 1}`,
-        name: villageName,
-        icon: villageName.includes('원자재') ? '🏆' : (villageName.includes('신흥국') ? '🌏' : '🏦'),
-        assets: [],
-        type: "new",
-        goal: "diversification",
-        totalValue: 0,
-        returnRate: 0,
-        allocation: 0,
-        lastBriefingRead: null
-    };
+        const result = await fetchAPI('/villages', {
+            method: 'POST',
+            body: JSON.stringify(newVillage)
+        });
 
-    data.villages.push(newVillage);
+        showToast(`"${villageName}"이(가) 내 포트폴리오에 추가되었습니다! 🎉`);
 
-    // 추천 마을을 추가한 경우, 추천 목록에서 제거
-    if (data.recommendation && data.recommendation.recommendedVillages) {
-        const index = data.recommendation.recommendedVillages.indexOf(villageName);
-        if (index > -1) {
-            data.recommendation.recommendedVillages.splice(index, 1);
-        }
-
-        // 추천 마을이 모두 추가되면 추천 상태 해제
-        if (data.recommendation.recommendedVillages.length === 0) {
-            data.recommendation.hasNewRecommendation = false;
-        }
+        // 마을 관리 페이지로 이동
+        setTimeout(() => {
+            showPage('villages');
+        }, 1500);
+    } catch (error) {
+        console.error('마을 추가 오류:', error);
+        showToast('마을 추가에 실패했습니다.', 'error');
     }
-
-    saveData(data);
-
-    // 추천 배너/핫스팟 업데이트
-    renderRecommendationBanner();
-
-    // 마을 관리 페이지로 이동
-    setTimeout(() => {
-        showPage('villages');
-    }, 1500);
 }
 
 // ========== 추천 마을 관리 ==========
 
 // 추천 배너 및 핫스팟 렌더링
-function renderRecommendationBanner() {
-    const data = loadData();
+function renderRecommendationBanner(mainData = null) {
     const banner = document.getElementById('recommendationBanner');
     const hotspot = document.getElementById('recommendationHotspot');
 
-    if (!data.recommendation) {
-        data.recommendation = {
-            hasNewRecommendation: true,
-            lastCheckedDate: null,
-            recommendedVillages: ['원자재 마을', '신흥국 마을', '채권 마을']
-        };
-        saveData(data);
+    if (!mainData || !mainData.recommendation) {
+        if (banner) banner.style.display = 'none';
+        if (hotspot) hotspot.style.display = 'none';
+        return;
     }
 
-    if (data.recommendation.hasNewRecommendation && data.recommendation.recommendedVillages.length > 0) {
+    if (mainData.recommendation.hasNewRecommendation && mainData.recommendation.recommendedVillages && mainData.recommendation.recommendedVillages.length > 0) {
         // 추천이 있는 경우 배너와 핫스팟 표시
         if (banner) banner.style.display = 'flex';
         if (hotspot) hotspot.style.display = 'block';
@@ -863,11 +1041,22 @@ function generateNewRecommendation() {
     showToast('✨ 새로운 이웃 마을 추천이 생성되었습니다!');
 }
 
+// 메인 페이지 렌더링
+async function renderMain() {
+    try {
+        const data = await fetchAPI('/main');
+        await renderAssetChart(data);
+        renderMapBadges(data);
+        renderRecommendationBanner(data);
+    } catch (error) {
+        console.error('메인 페이지 로드 오류:', error);
+    }
+}
+
 // 자산 차트 생성
 let assetChart = null;
 
-function renderAssetChart() {
-    const data = loadData();
+async function renderAssetChart(mainData = null) {
     const canvas = document.getElementById('assetPieChart');
 
     if (!canvas) return;
@@ -875,6 +1064,17 @@ function renderAssetChart() {
     // 기존 차트가 있으면 제거
     if (assetChart) {
         assetChart.destroy();
+    }
+
+    // mainData가 없으면 API에서 가져오기
+    let data = mainData;
+    if (!data) {
+        try {
+            data = await fetchAPI('/main');
+        } catch (error) {
+            console.error('메인 데이터 로드 실패:', error);
+            return;
+        }
     }
 
     // 자산 유형별로 그룹화
@@ -957,6 +1157,28 @@ function renderAssetChart() {
         legendContainer.appendChild(legendItem);
     });
 
+    // 중앙 텍스트 플러그인
+    const centerTextPlugin = {
+        id: 'centerText',
+        afterDatasetsDraw(chart) {
+            const { ctx, chartArea: { left, top, right, bottom } } = chart;
+            const centerX = (left + right) / 2;
+            const centerY = (top + bottom) / 2;
+
+            ctx.save();
+            ctx.font = 'bold 14px "Noto Sans KR"';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('총 자산', centerX, centerY - 15);
+
+            ctx.font = 'bold 20px "Noto Sans KR"';
+            ctx.fillStyle = '#FF6B35';
+            ctx.fillText(totalAssets.toLocaleString() + '원', centerX, centerY + 10);
+            ctx.restore();
+        }
+    };
+
     // Chart.js로 차트 생성
     const ctx = canvas.getContext('2d');
     assetChart = new Chart(ctx, {
@@ -992,55 +1214,94 @@ function renderAssetChart() {
                     padding: 12,
                     titleFont: { size: 14 },
                     bodyFont: { size: 13 }
+                },
+                datalabels: {
+                    color: '#fff',
+                    font: {
+                        weight: 'bold',
+                        size: 13,
+                        family: '"Noto Sans KR", sans-serif'
+                    },
+                    formatter: (value, context) => {
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        const label = context.chart.data.labels[context.dataIndex];
+
+                        // 비율이 5% 미만이면 라벨 숨김 (공간 절약)
+                        if (percentage < 5) {
+                            return '';
+                        }
+
+                        return label + '\n' + percentage + '%';
+                    },
+                    textAlign: 'center',
+                    anchor: 'center',
+                    align: 'center',
+                    textShadowBlur: 4,
+                    textShadowColor: 'rgba(0, 0, 0, 0.5)'
                 }
             },
             cutout: '60%'
-        }
+        },
+        plugins: [centerTextPlugin]
     });
 }
 
 // 마이페이지 로드
-function loadMypage() {
-    const data = loadData();
+async function loadMypage() {
+    try {
+        const data = await fetchAPI('/mypage');
 
-    // 프로필 정보 로드
-    document.getElementById('userName').value = data.user_profile.name || '';
-    document.getElementById('userTheme').value = data.user_profile.theme || 'light';
+        // 프로필 정보 로드
+        document.getElementById('userName').value = data.userProfile?.name || '';
+        document.getElementById('userTheme').value = data.userProfile?.theme || 'light';
 
-    // 설정 정보 로드
-    document.getElementById('briefingTime').value = data.settings.briefing_time || '08:00';
-    document.getElementById('voiceSpeed').value = data.settings.voice_speed || 1.0;
-    document.getElementById('voiceSpeedValue').textContent = (data.settings.voice_speed || 1.0) + 'x';
+        // 설정 정보 로드
+        document.getElementById('briefingTime').value = data.settings?.briefing_time || '08:00';
+        document.getElementById('voiceSpeed').value = data.settings?.voice_speed || 1.0;
+        document.getElementById('voiceSpeedValue').textContent = (data.settings?.voice_speed || 1.0) + 'x';
 
-    // 음성 속도 슬라이더 이벤트
-    document.getElementById('voiceSpeed').addEventListener('input', function() {
-        document.getElementById('voiceSpeedValue').textContent = this.value + 'x';
-    });
+        // 음성 속도 슬라이더 이벤트
+        document.getElementById('voiceSpeed').addEventListener('input', function() {
+            document.getElementById('voiceSpeedValue').textContent = this.value + 'x';
+        });
 
-    // 통계 정보 계산 및 표시
-    updateStatistics(data);
+        // 통계 정보 계산 및 표시
+        updateStatistics(data);
 
-    // 자산 연동 상태 업데이트
-    updateIntegrationStatus();
+        // 자산 연동 상태 업데이트
+        updateIntegrationStatus();
 
-    // 투자 진단 결과 로드
-    if (data.investment_test && data.investment_test.completed) {
-        const typeInfo = investmentTypes[data.investment_test.mainType];
-        updateTestSummary(typeInfo);
+        // 투자 진단 결과 로드
+        if (data.investment_test && data.investment_test.completed) {
+            const typeInfo = investmentTypes[data.investment_test.mainType];
+            updateTestSummary(typeInfo);
+        }
+    } catch (error) {
+        console.error('마이페이지 로드 오류:', error);
+        showToast('마이페이지 로드에 실패했습니다.', 'error');
     }
 }
 
 // 통계 정보 업데이트
 function updateStatistics(data) {
+    if (!data.villages || data.villages.length === 0) {
+        document.getElementById('statTotalAssets').textContent = '0원';
+        document.getElementById('statVillageCount').textContent = '0개';
+        document.getElementById('statAvgReturn').textContent = '0%';
+        document.getElementById('statAssetCount').textContent = '0개';
+        return;
+    }
+
     // 총 자산
-    const totalAssets = data.villages.reduce((sum, v) => sum + v.totalValue, 0);
+    const totalAssets = data.villages.reduce((sum, v) => sum + (v.totalValue || 0), 0);
     document.getElementById('statTotalAssets').textContent = totalAssets.toLocaleString() + '원';
 
     // 마을 수
     document.getElementById('statVillageCount').textContent = data.villages.length + '개';
 
     // 평균 수익률
-    const avgReturn = data.villages.reduce((sum, v) => sum + v.returnRate, 0) / data.villages.length;
+    const avgReturn = data.villages.reduce((sum, v) => sum + (v.returnRate || 0), 0) / data.villages.length;
     const avgReturnFormatted = avgReturn >= 0 ? '+' + avgReturn.toFixed(1) : avgReturn.toFixed(1);
     document.getElementById('statAvgReturn').textContent = avgReturnFormatted + '%';
     document.getElementById('statAvgReturn').style.color = avgReturn >= 0 ? 'var(--success)' : 'var(--danger)';
@@ -1048,7 +1309,7 @@ function updateStatistics(data) {
     // 보유 자산 수
     let totalAssetCount = 0;
     data.villages.forEach(village => {
-        totalAssetCount += village.assets.length;
+        totalAssetCount += village.assets ? village.assets.length : 0;
     });
     document.getElementById('statAssetCount').textContent = totalAssetCount + '개';
 }
@@ -1057,13 +1318,13 @@ function updateStatistics(data) {
 function saveProfile() {
     const data = loadData();
 
-    data.user_profile.name = document.getElementById('userName').value;
-    data.user_profile.theme = document.getElementById('userTheme').value;
+    data.userProfile.name = document.getElementById('userName').value;
+    data.userProfile.theme = document.getElementById('userTheme').value;
 
     saveData(data);
 
     // 테마 적용
-    applyTheme(data.user_profile.theme);
+    applyTheme(data.userProfile.theme);
 
     // 성공 메시지
     showToast('프로필이 저장되었습니다! ✅');
@@ -1170,7 +1431,7 @@ function showMainApp() {
 }
 
 // 로그인 처리
-function handleLogin(event) {
+async function handleLogin(event) {
     event.preventDefault();
 
     const userId = document.getElementById('loginId').value.trim();
@@ -1182,21 +1443,36 @@ function handleLogin(event) {
         return;
     }
 
-    // 로그인 성공 처리
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userId', userId);
+    try {
+        // API 로그인 호출
+        const result = await fetchAPI('/login', {
+            method: 'POST',
+            body: JSON.stringify({
+                username: userId,
+                password: userPw
+            })
+        });
 
-    // 입력 필드 초기화
-    document.getElementById('loginId').value = '';
-    document.getElementById('loginPw').value = '';
+        // 로그인 성공 처리
+        localStorage.setItem('isLoggedIn', 'true');
+        localStorage.setItem('userId', result.user?.name || userId);
+        localStorage.setItem('accessToken', result.accessToken);
 
-    // 메인 앱 표시
-    showMainApp();
+        // 입력 필드 초기화
+        document.getElementById('loginId').value = '';
+        document.getElementById('loginPw').value = '';
 
-    // 환영 메시지
-    setTimeout(() => {
-        showToast(`✅ 환영합니다, ${userId}님!`);
-    }, 300);
+        // 메인 앱 표시
+        showMainApp();
+
+        // 환영 메시지
+        setTimeout(() => {
+            showToast(`✅ 환영합니다, ${result.user?.name || userId}님!`);
+        }, 300);
+    } catch (error) {
+        console.error('로그인 오류:', error);
+        showToast('로그인에 실패했습니다. 아이디와 비밀번호를 확인해주세요.', 'error');
+    }
 }
 
 // 로그아웃 처리
@@ -1208,14 +1484,29 @@ function logout() {
         confirmText: '로그아웃',
         cancelText: '취소',
         confirmType: 'danger',
-        onConfirm: () => {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('userId');
+        onConfirm: async () => {
+            try {
+                // API 로그아웃 호출
+                await fetchAPI('/logout', {
+                    method: 'POST'
+                });
 
-            // 로그인 페이지로 이동
-            showLoginPage();
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('accessToken');
 
-            showToast('로그아웃되었습니다.', 'info');
+                // 로그인 페이지로 이동
+                showLoginPage();
+
+                showToast('로그아웃되었습니다.', 'info');
+            } catch (error) {
+                console.error('로그아웃 오류:', error);
+                // 로그아웃 실패해도 로컬 상태는 정리
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('accessToken');
+                showLoginPage();
+            }
         }
     });
 }
@@ -1228,7 +1519,7 @@ window.onload = () => {
     if (isLoggedIn) {
         // 저장된 테마 적용
         const data = loadData();
-        applyTheme(data.user_profile.theme || 'light');
+        applyTheme(data.userProfile.theme || 'light');
 
         renderVillages();
         renderAssetChart();

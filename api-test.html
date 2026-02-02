@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API 테스트 페이지</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .test-section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .test-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .test-button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .result.success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+
+        .result.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status.success {
+            background: #28a745;
+            color: white;
+        }
+
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .input-group {
+            margin: 10px 0;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .server-status {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .server-status h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 K-AMIs API 테스트</h1>
+
+        <div class="server-status">
+            <h3>서버 상태</h3>
+            <button class="test-button" onclick="checkServerHealth()">서버 연결 확인</button>
+            <div id="server-status-result"></div>
+        </div>
+
+        <!-- GET API 테스트 -->
+        <div class="test-section">
+            <h2>📥 GET API 테스트</h2>
+            <button class="test-button" onclick="testAPI('GET', '/api/main', 'main-result')">GET /api/main</button>
+            <button class="test-button" onclick="testAPI('GET', '/api/villages', 'villages-result')">GET /api/villages</button>
+            <button class="test-button" onclick="testAPI('GET', '/api/briefing', 'briefing-result')">GET /api/briefing</button>
+            <button class="test-button" onclick="testAPI('GET', '/api/daily', 'daily-result')">GET /api/daily</button>
+            <button class="test-button" onclick="testAPI('GET', '/api/neighbors', 'neighbors-result')">GET /api/neighbors</button>
+            <button class="test-button" onclick="testAPI('GET', '/api/mypage', 'mypage-result')">GET /api/mypage</button>
+            <div id="get-results"></div>
+        </div>
+
+        <!-- 로그인 테스트 -->
+        <div class="test-section">
+            <h2>🔐 로그인 API 테스트</h2>
+            <div class="input-group">
+                <label>사용자 ID:</label>
+                <input type="text" id="login-username" value="testuser" placeholder="사용자 ID 입력">
+            </div>
+            <div class="input-group">
+                <label>비밀번호:</label>
+                <input type="password" id="login-password" value="testpass" placeholder="비밀번호 입력">
+            </div>
+            <button class="test-button" onclick="testLogin()">로그인 테스트</button>
+            <div id="login-result"></div>
+        </div>
+
+        <!-- 마을 생성 테스트 -->
+        <div class="test-section">
+            <h2>🏘️ 마을 생성 API 테스트</h2>
+            <div class="input-group">
+                <label>마을 이름:</label>
+                <input type="text" id="village-name" value="테스트마을" placeholder="마을 이름 입력">
+            </div>
+            <div class="input-group">
+                <label>아이콘:</label>
+                <input type="text" id="village-icon" value="🏠" placeholder="이모지 입력">
+            </div>
+            <div class="input-group">
+                <label>타입:</label>
+                <input type="text" id="village-type" value="test" placeholder="마을 타입">
+            </div>
+            <div class="input-group">
+                <label>목표:</label>
+                <input type="text" id="village-goal" value="testing" placeholder="투자 목표">
+            </div>
+            <button class="test-button" onclick="testCreateVillage()">마을 생성 테스트</button>
+            <div id="village-result"></div>
+        </div>
+
+        <!-- 로그아웃 테스트 -->
+        <div class="test-section">
+            <h2>🚪 로그아웃 API 테스트</h2>
+            <button class="test-button" onclick="testLogout()">로그아웃 테스트</button>
+            <div id="logout-result"></div>
+        </div>
+
+        <!-- 마을 상세 테스트 -->
+        <div class="test-section">
+            <h2>🏘️ 마을 상세 정보 API 테스트</h2>
+            <div class="input-group">
+                <label>마을 ID:</label>
+                <input type="text" id="village-detail-id" value="village-us" placeholder="마을 ID 입력">
+            </div>
+            <button class="test-button" onclick="testVillageDetail()">마을 상세 정보 조회</button>
+            <div id="village-detail-result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://127.0.0.1:8000';
+
+        async function checkServerHealth() {
+            const resultDiv = document.getElementById('server-status-result');
+            resultDiv.innerHTML = '<p>연결 확인 중...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                const data = await response.json();
+
+                if (data.status === 'ok') {
+                    resultDiv.innerHTML = `
+                        <div class="result success">
+                            <strong>서버 상태: <span class="status success">정상</span></strong>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('서버 응답이 비정상입니다.');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>서버 상태: <span class="status error">오류</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                        <p>서버가 실행 중인지 확인하세요: http://127.0.0.1:8000</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testAPI(method, endpoint, resultId) {
+            const resultDiv = document.createElement('div');
+            resultDiv.id = resultId;
+
+            const getResultsDiv = document.getElementById('get-results');
+            const existingResult = document.getElementById(resultId);
+            if (existingResult) {
+                existingResult.remove();
+            }
+
+            resultDiv.innerHTML = `<p style="margin-top: 15px;"><strong>${method} ${endpoint}</strong> - 요청 중...</p>`;
+            getResultsDiv.appendChild(resultDiv);
+
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>${method} ${endpoint} <span class="status ${response.ok ? 'success' : 'error'}">${response.status}</span></strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>${method} ${endpoint} <span class="status error">ERROR</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            const resultDiv = document.getElementById('login-result');
+
+            resultDiv.innerHTML = '<p style="margin-top: 15px;">로그인 요청 중...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>POST /api/login <span class="status ${response.ok ? 'success' : 'error'}">${response.status}</span></strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+
+                if (response.ok && data.accessToken) {
+                    localStorage.setItem('accessToken', data.accessToken);
+                    console.log('✅ 액세스 토큰 저장됨:', data.accessToken);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>POST /api/login <span class="status error">ERROR</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testLogout() {
+            const resultDiv = document.getElementById('logout-result');
+            resultDiv.innerHTML = '<p style="margin-top: 15px;">로그아웃 요청 중...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/logout`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>POST /api/logout <span class="status ${response.ok ? 'success' : 'error'}">${response.status}</span></strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+
+                if (response.ok) {
+                    localStorage.removeItem('accessToken');
+                    console.log('✅ 액세스 토큰 제거됨');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>POST /api/logout <span class="status error">ERROR</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testCreateVillage() {
+            const name = document.getElementById('village-name').value;
+            const icon = document.getElementById('village-icon').value;
+            const type = document.getElementById('village-type').value;
+            const goal = document.getElementById('village-goal').value;
+            const resultDiv = document.getElementById('village-result');
+
+            resultDiv.innerHTML = '<p style="margin-top: 15px;">마을 생성 요청 중...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/villages`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        icon: icon,
+                        type: type,
+                        goal: goal
+                    })
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>POST /api/villages <span class="status ${response.ok ? 'success' : 'error'}">${response.status}</span></strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>POST /api/villages <span class="status error">ERROR</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testVillageDetail() {
+            const villageId = document.getElementById('village-detail-id').value;
+            const resultDiv = document.getElementById('village-detail-result');
+
+            resultDiv.innerHTML = '<p style="margin-top: 15px;">마을 정보 조회 중...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/villages/${villageId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                resultDiv.innerHTML = `
+                    <div class="result ${response.ok ? 'success' : 'error'}">
+                        <strong>GET /api/villages/${villageId} <span class="status ${response.ok ? 'success' : 'error'}">${response.status}</span></strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="result error">
+                        <strong>GET /api/villages/${villageId} <span class="status error">ERROR</span></strong>
+                        <p>❌ 오류: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // 페이지 로드 시 자동으로 서버 상태 확인
+        window.addEventListener('load', () => {
+            checkServerHealth();
+        });
+    </script>
+</body>
+</html>
