@@ -4,7 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K-AMIs (캐미s) - Ant Village</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <!-- CSS 파일들 (순서 중요: 변수 → 레이아웃 → 컴포넌트 → 페이지 → 반응형) -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/pages-main.css">
+    <link rel="stylesheet" href="css/pages-analysis.css">
+    <link rel="stylesheet" href="css/pages-mypage.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -829,6 +837,18 @@
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <!-- JavaScript 파일들 (순서 중요: 데이터 → API → 유틸 → 기능 모듈 → 인증) -->
+    <script src="js/data.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/ui-utils.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/villages.js"></script>
+    <script src="js/main-page.js"></script>
+    <script src="js/analysis.js"></script>
+    <script src="js/mypage.js"></script>
+    <script src="js/mydata.js"></script>
+    <script src="js/investment-test.js"></script>
+    <script src="js/auth.js"></script>
 </body>
 </html>

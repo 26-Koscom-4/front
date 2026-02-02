@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+:root {
+    --primary: #FF6B35;
+    --primary-hover: #e55a2f;
+    --secondary: #F7931E;
+    --accent: #FFD23F;
+    --dark: #1A1A2E;
+    --darker: #0F0F1E;
+    --light: #EEEEEE;
+    --success: #4ECDC4;
+    --success-hover: #3db8af;
+    --danger: #FF6B6B;
+    --danger-hover: #e55a5a;
+    --text: #333;
+    --text-light: #555;
+    --bg-gradient-start: #667eea;
+    --bg-gradient-end: #764ba2;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0,0,0,0.1);
+    --input-border: #EEEEEE;
+    --stat-bg-start: #f5f7fa;
+    --stat-bg-end: #c3cfe2;
+}
+
+/* 다크모드 색상 */
+body.dark {
+    --primary: #FF8C61;
+    --secondary: #FFA94D;
+    --accent: #FFD93D;
+    --dark: #E8E8E8;
+    --darker: #F5F5F5;
+    --light: #2A2A3E;
+    --success: #5FD9CF;
+    --danger: #FF7B7B;
+    --text: #E8E8E8;
+    --text-light: #B0B0B0;
+    --bg-gradient-start: #1a1a2e;
+    --bg-gradient-end: #16213e;
+    --card-bg: #252538;
+    --card-shadow: rgba(0,0,0,0.3);
+    --input-border: #3A3A4E;
+    --stat-bg-start: #2d2d42;
+    --stat-bg-end: #3a3a52;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    min-height: 100vh;
+    color: var(--text);
+    overflow-x: hidden;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
