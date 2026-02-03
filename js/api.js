@@ -1,10 +1,47 @@
 // ========== API 설정 ==========
 // 실제 API 연결 (주석처리됨 - 목업 데이터 사용 중)
-/*
-const API_BASE_URL = 'http://localhost:8000/api';
+
+const API_BASE_URL = 'http://221.168.32.109:8000/api';
 
 // API 호출 유틸리티 함수
 async function fetchAPI(endpoint, options = {}) {
+
+    // 로그인 (mock)
+    if (endpoint === '/login' && options.method === 'POST') {
+        const credentials = JSON.parse(options.body);
+        return {
+            success: true,
+            accessToken: 'mock-token-' + Date.now(),
+            user: {
+                name: credentials.username || '코린이'
+            }
+        };
+    }
+
+    // 로그아웃 (mock)
+    if (endpoint === '/logout' && options.method === 'POST') {
+        return { success: true };
+    }
+
+    // 마이페이지 데이터
+    if (endpoint === '/mypage') {
+        return {
+            userProfile: "코스콤",
+            settings: sampleData.settings,
+            villages: sampleData.villages,
+            investment_test: {
+                completed: false
+            }
+        };
+    }
+
+    // 이웃 개미 추천
+    if (endpoint === '/neighbors') {
+        return {
+            recommendations: sampleData.recommendation.recommendedVillages
+        };
+    }
+
     try {
         const url = `${API_BASE_URL}${endpoint}`;
         const headers = {
@@ -44,10 +81,10 @@ async function fetchAPI(endpoint, options = {}) {
         throw error;
     }
 }
-*/
 
 // ========== 목업 API (Mock API) ==========
 // 실제 서버 없이 동작하도록 목업 데이터 사용
+/*
 async function fetchAPI(endpoint, options = {}) {
     // 실제 API 호출을 시뮬레이션하기 위한 지연
     await new Promise(resolve => setTimeout(resolve, 300));
@@ -192,4 +229,4 @@ async function fetchAPI(endpoint, options = {}) {
         throw error;
     }
 }
-
+*/

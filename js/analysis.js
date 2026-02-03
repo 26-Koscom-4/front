@@ -6,43 +6,50 @@ let assetTypeChart = null;
 // 포트폴리오 분석 페이지 렌더링
 async function renderAnalysis() {
     try {
-        const data = await fetchAPI('/analysis');
+
+        const data = await fetchAPI('/portfolio/summary?user_id=1');
+        console.log('포트폴리오 분석 데이터:', data);
 
         // 요약 카드 업데이트
-        document.getElementById('analysisTotalAssets').textContent = data.totalAssets.toLocaleString() + '원';
-        document.getElementById('analysisTotalReturn').textContent = (data.totalReturn >= 0 ? '+' : '') + data.totalReturn + '%';
-        document.getElementById('analysisVillageCount').textContent = data.villages.length + '개';
+        document.getElementById('analysisTotalAssets').textContent = data.summary.total_assets_value.toLocaleString() + '원';
+        document.getElementById('analysisTotalReturn').textContent = (data.summary.total_profit_rate >= 0 ? '+' : '-') + data.summary.total_profit_rate + '%';
+        document.getElementById('analysisVillageCount').textContent = data.summary.village_count + '개';
 
         // 자산 변화 계산
-        const assetChange = (data.totalAssets * data.monthlyChange / 100);
+        //const assetChange = (data.totalAssets * data.monthlyChange / 100);
         document.getElementById('analysisAssetChange').textContent =
-            '+' + assetChange.toLocaleString() + '원 (+' + data.monthlyChange + '%)';
+            '+' + data.summary.total_profit_value.toLocaleString() + '원 (+' + data.summary.total_profit_rate + '%)';
         document.getElementById('analysisAssetChange').className =
-            'analysis-card-change ' + (data.monthlyChange >= 0 ? 'positive' : 'negative');
+            'analysis-card-change ' + (data.summary.total_profit_rate >= 0 ? 'positive' : 'negative');
 
         // 수익률 변화
-        document.getElementById('analysisReturnChange').textContent = '전월 대비 +2.3%p';
-        document.getElementById('analysisReturnChange').className = 'analysis-card-change positive';
+        document.getElementById('analysisReturnChange').textContent = "전월 대비 " + (data.summary.daily_return_rate_point >= 0 ? "+" : "-") + data.summary.daily_return_rate_point + "%p";
+        document.getElementById('analysisReturnChange').className = 'analysis-card-change ' + (data.summary.daily_return_rate_point >= 0 ? 'positive' : 'negative');
 
         // 자산 개수
-        const totalAssetCount = data.villages.reduce((sum, v) => sum + v.assets.length, 0);
+        const totalAssetCount = data.summary.owned_asset_count;
         document.getElementById('analysisVillageInfo').textContent = totalAssetCount + '개 자산 보유';
 
         // 투자 성향
-        const investStyle = getInvestmentStyle();
+        const investStyle = {   
+            'level': '적극투자형',
+            'desc': '높은 수익률을 추구하는 투자자'
+        }
+        
+        // const investStyle = getInvestmentStyle();
         document.getElementById('analysisRiskLevel').textContent = investStyle.level;
         document.getElementById('analysisRiskDesc').textContent = investStyle.desc;
 
         // 차트 렌더링
-        renderVillagePerformanceChart(data.villages);
-        renderAssetTypeChart(data.villages);
+        renderVillagePerformanceChart(data.village_return_rates);
+        renderAssetTypeChart(data.asset_type_distribution);
 
         // 상위/하위 종목 렌더링
-        renderTopPerformers(data.villages);
-        renderBottomPerformers(data.villages);
+        renderTopPerformers(data.top5_returns);
+        renderBottomPerformers(data.bottom5_returns);
 
         // 리밸런싱 추천
-        renderRebalancingRecommendations(data);
+        renderRebalancingRecommendations(data.rebalancing_recommendations);
 
     } catch (error) {
         console.error('포트폴리오 분석 로드 오류:', error);
@@ -71,8 +78,9 @@ function renderVillagePerformanceChart(villages) {
     }
 
     const ctx = canvas.getContext('2d');
-    const labels = villages.map(v => v.name);
-    const data = villages.map(v => v.returnRate);
+    // TODO v.village_id -> v.name으로 변경
+    const labels = villages.map(v => v.village_id);
+    const data = villages.map(v => v.return_rate);
     const colors = data.map(rate => rate >= 0 ? 'rgba(78, 205, 196, 0.8)' : 'rgba(255, 107, 107, 0.8)');
 
     villagePerformanceChart = new Chart(ctx, {
@@ -128,11 +136,17 @@ function renderAssetTypeChart(villages) {
     // 자산 유형별 집계
     const assetTypeMap = {};
     villages.forEach(village => {
+        // TODO village.key -> village.name 변경
+        const assetType = village.key;
+        const assetValue = village.value;
+        assetTypeMap[assetType] = (assetTypeMap[assetType] || 0) + assetValue;
+        /*
         village.assets.forEach(asset => {
             const assetType = typeof asset === 'string' ? '기타' : asset.type;
             const assetValue = typeof asset === 'string' ? 0 : asset.value;
             assetTypeMap[assetType] = (assetTypeMap[assetType] || 0) + assetValue;
         });
+        */
     });
 
     const ctx = canvas.getContext('2d');
@@ -188,16 +202,28 @@ function renderTopPerformers(villages) {
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
     villages.forEach(village => {
-        village.assets.forEach(asset => {
-            if (typeof asset !== 'string') {
-                allAssets.push({
-                    name: asset.name,
-                    village: village.name,
-                    return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
-                });
-            }
-        });
-    });
+        if (typeof village !== 'string') {
+            allAssets.push({
+                name: village.name,
+                village: village.symbol,
+                return : village.return_rate
+                // return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
+            });
+        }
+    }
+        
+        /*village => {
+            village.assets.forEach(asset => {
+                if (typeof asset !== 'string') {
+                    allAssets.push({
+                        name: asset.name,
+                        village: village.name,
+                        return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
+                    });
+                }
+            });
+        }*/
+    );
 
     // 수익률 기준 정렬
     allAssets.sort((a, b) => b.return - a.return);
@@ -229,16 +255,28 @@ function renderBottomPerformers(villages) {
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
     villages.forEach(village => {
-        village.assets.forEach(asset => {
-            if (typeof asset !== 'string') {
-                allAssets.push({
-                    name: asset.name,
-                    village: village.name,
-                    return: Math.random() * 30 - 5
-                });
-            }
-        });
-    });
+        if (typeof village !== 'string') {
+            allAssets.push({
+                name: village.name,
+                village: village.symbol,
+                return : village.return_rate
+                // return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
+            });
+        }
+    }
+        
+        /*village => {
+            village.assets.forEach(asset => {
+                if (typeof asset !== 'string') {
+                    allAssets.push({
+                        name: asset.name,
+                        village: village.name,
+                        return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
+                    });
+                }
+            });
+        }*/
+    );
 
     // 수익률 기준 정렬
     allAssets.sort((a, b) => a.return - b.return);
@@ -313,10 +351,37 @@ async function downloadExcel() {
     try {
         showToast('Excel 파일을 생성하고 있습니다...', 'info');
 
-        const data = await fetchAPI('/analysis');
+        // const data = await fetchAPI('/analysis');
 
         // 워크북 생성
         const wb = XLSX.utils.book_new();
+
+        // 요약 카드 업데이트
+        document.getElementById('analysisTotalAssets').textContent = data.summary.total_assets_value.toLocaleString() + '원';
+        document.getElementById('analysisTotalReturn').textContent = (data.summary.total_profit_rate >= 0 ? '+' : '-') + data.summary.total_profit_rate + '%';
+        document.getElementById('analysisVillageCount').textContent = data.summary.village_count + '개';
+
+        // 자산 변화 계산
+        //const assetChange = (data.totalAssets * data.monthlyChange / 100);
+        document.getElementById('analysisAssetChange').textContent =
+            '+' + data.summary.total_profit_value.toLocaleString() + '원 (+' + data.summary.total_profit_rate + '%)';
+        document.getElementById('analysisAssetChange').className =
+            'analysis-card-change ' + (data.summary.total_profit_rate >= 0 ? 'positive' : 'negative');
+
+        // 수익률 변화
+        document.getElementById('analysisReturnChange').textContent = "전월 대비 " + (data.summary.daily_return_rate_point >= 0 ? "+" : "-") + data.summary.daily_return_rate_point + "%p";
+        document.getElementById('analysisReturnChange').className = 'analysis-card-change ' + (data.summary.daily_return_rate_point >= 0 ? 'positive' : 'negative');
+
+        // 자산 개수
+        const totalAssetCount = data.summary.owned_asset_count;
+        document.getElementById('analysisVillageInfo').textContent = totalAssetCount + '개 자산 보유';
+
+        const data = {
+            totalAssets: document.getElementById('analysisTotalAssets').textContent.replace(/[^0-9]/g, '') * 1,
+            totalReturn: document.getElementById('analysisTotalReturn').textContent.replace(/[^0-9.-]/g, ''),
+            villages_count: document.getElementById('analysisVillageCount').textContent,
+            owned_assets_count: document.getElementById('analysisVillageInfo').textContent,
+        }
 
         // 1. 요약 시트
         const summaryData = [
@@ -326,8 +391,8 @@ async function downloadExcel() {
             ['항목', '값'],
             ['총 자산', data.totalAssets.toLocaleString() + '원'],
             ['총 수익률', (data.totalReturn >= 0 ? '+' : '') + data.totalReturn + '%'],
-            ['운영 마을 수', data.villages.length + '개'],
-            ['보유 자산 수', data.villages.reduce((sum, v) => sum + v.assets.length, 0) + '개']
+            ['운영 마을 수', data.villages_count],
+            ['보유 자산 수', data.owned_assets_count]
         ];
         const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
         XLSX.utils.book_append_sheet(wb, summarySheet, '포트폴리오 요약');

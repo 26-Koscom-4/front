@@ -126,18 +126,26 @@ function filterVillages(filterType) {
 // 마을 상세 정보 모달
 async function showVillageDetail(villageId, villageName) {
     try {
-        const village = await fetchAPI(`/villages/${villageId}`);
+        const data = await fetchAPI(`/villages/${villageId}/summary?user_id=1`);
 
         const modal = document.getElementById('villageModal');
         const content = document.getElementById('modalContent');
 
-        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
-        const returnSign = village.returnRate >= 0 ? '+' : '';
+        const returnClass = data.returnRate >= 0 ? 'positive' : 'negative';
+        const returnSign = data.returnRate >= 0 ? '+' : '';
 
+        const icon = {
+            '국장마을': '🇰🇷',
+            '미장마을': '🇺🇸',
+            '배당마을': '💰',
+            '글로벌ETF마을': '🌍',
+        }
+
+        // TODO AI 한줄 평 분석 추가
         content.innerHTML = `
             <h2 style="color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 48px;">${village.icon}</span>
-                <span>${village.name}</span>
+                <span style="font-size: 48px;">${icon[data.village.name]}</span>
+                <span>${data.village.name}</span>
             </h2>
 
             <div style="margin: 20px 0; padding: 20px; background: linear-gradient(135deg, var(--stat-bg-start) 0%, var(--stat-bg-end) 100%); border-radius: 15px;">
@@ -145,23 +153,23 @@ async function showVillageDetail(villageId, villageName) {
                 <div style="display: grid; gap: 10px;">
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: var(--text-light);">총 자산</span>
-                        <span style="font-weight: 700; color: var(--dark);">${village.totalValue.toLocaleString()}원</span>
+                        <span style="font-weight: 700; color: var(--dark);">${data.village.metrics.total_assets.toLocaleString()}원</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: var(--text-light);">수익률</span>
-                        <span class="stat-value ${returnClass}" style="font-weight: 700;">${returnSign}${village.returnRate}%</span>
+                        <span class="stat-value ${returnClass}" style="font-weight: 700;">${returnSign}${data.village.metrics.return_rate}%</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: var(--text-light);">포트폴리오 비중</span>
-                        <span style="font-weight: 700; color: var(--dark);">${village.allocation}%</span>
+                        <span style="font-weight: 700; color: var(--dark);">${data.village.metrics.portfolio_weight}%</span>
                     </div>
                 </div>
             </div>
 
             <div style="margin: 20px 0;">
-                <h3 style="color: var(--primary); margin-bottom: 10px;">💼 보유 자산 (${village.assets.length}개)</h3>
+                <h3 style="color: var(--primary); margin-bottom: 10px;">💼 보유 자산 (${data.village.assets.count}개)</h3>
                 <div class="assets-list" style="margin-top: 15px;">
-                    ${village.assets.map(asset => {
+                    ${data.village.assets.items.map(asset => {
                         const assetName = typeof asset === 'string' ? asset : asset.name;
                         return `<span class="asset-tag">${assetName}</span>`;
                     }).join('')}
@@ -170,17 +178,23 @@ async function showVillageDetail(villageId, villageName) {
 
             <div style="margin: 20px 0; padding: 15px; background: var(--light); border-radius: 10px;">
                 <div style="margin-bottom: 8px;">
+                    <strong style="color: var(--dark);">AI 한 줄 분석 : </strong>
+                    <span style="color: var(--text);">${ (data.village.ai_one_liner === null ? "AI가 포트폴리오를 분석 중입니다." : data.village.ai_one_liner) }</span>
+                </div>
+                <!--
+                <div style="margin-bottom: 8px;">
                     <strong style="color: var(--dark);">투자 유형:</strong>
-                    <span style="color: var(--text);">${getVillageTypeText(village.type)}</span>
+                    <span style="color: var(--text);"></span>
                 </div>
                 <div>
                     <strong style="color: var(--dark);">투자 목표:</strong>
-                    <span style="color: var(--text);">${getVillageGoalText(village.goal)}</span>
+                    <span style="color: var(--text);"></span>
                 </div>
+                -->
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button class="audio-button" onclick="goToVillageAndCloseModal('${village.name}')" style="flex: 1; background: var(--success);">
+                <button class="audio-button" onclick="goToVillageAndCloseModal('${data.village.name}')" style="flex: 1; background: var(--success);">
                     🏘️ 마을로 이동
                 </button>
                 <button class="audio-button" onclick="closeModal()" style="flex: 1; background: var(--text-light);">
@@ -411,9 +425,10 @@ function renderMapBadges(mainData = null) {
 
     // 각 마을의 읽음 상태 확인
     mainData.villages.forEach(village => {
-        const badgeId = villageBadgeMap[village.name];
+        const badgeId = villageBadgeMap[village.label + "마을"];
         if (badgeId) {
             const badge = document.getElementById(badgeId);
+            badge.village_id = village.id; // 마을 ID 저장
             if (badge) {
                 if (isBriefingUnread(village)) {
                     badge.style.display = 'block';
@@ -916,7 +931,10 @@ async function addVillage(villageName) {
 }
 
 // 마을 추가 모달 열기
-function openAddVillageModal() {
+async function openAddVillageModal() {
+
+    const data = await fetchAPI('/assets/available?user_id=1');
+
     const modal = document.getElementById('addVillageModal');
     modal.classList.add('active');
 
@@ -926,8 +944,23 @@ function openAddVillageModal() {
     document.getElementById('newVillageGoal').value = '';
     document.getElementById('newVillageIcon').value = '🏘️';
 
-    // 체크박스 초기화
-    document.querySelectorAll('input[name="villageAssets"]').forEach(cb => cb.checked = false);
+    // 종목 선택 리스트 렌더링
+    const assetsContainer = document.getElementById('assetCheckboxList');
+
+    
+    
+    assetsContainer.innerHTML = '';
+    data.available_assets.forEach(asset => {
+        const assetDiv = document.createElement('div');
+        assetDiv.style.marginBottom = '8px';
+        assetDiv.innerHTML = `
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" name="villageAssets" value="${asset.asset_id}" style="width: 18px; height: 18px; cursor: pointer;" asset_id: "${asset.asset_id}">
+                <span>${asset.name} (${asset.category})</span>
+            </label>
+        `;
+        assetsContainer.appendChild(assetDiv);
+    });
 
     // 아이콘 선택 초기화
     document.querySelectorAll('.icon-select-btn').forEach(btn => btn.classList.remove('selected'));
@@ -984,6 +1017,8 @@ function closeAddVillageModal() {
 async function submitNewVillage(event) {
     event.preventDefault();
 
+    console.log("test");
+
     const villageName = document.getElementById('newVillageName').value.trim();
     const villageType = document.getElementById('newVillageType').value;
     const villageGoal = document.getElementById('newVillageGoal').value;
@@ -991,7 +1026,7 @@ async function submitNewVillage(event) {
 
     // 선택된 종목 가져오기 (선택사항)
     const selectedAssets = Array.from(document.querySelectorAll('input[name="villageAssets"]:checked'))
-        .map(cb => cb.value);
+        .map(cb => { return { "asset_id": parseInt(cb.value) } });
 
     // 노트 수집
     const notes = Array.from(document.querySelectorAll('.village-note'))
@@ -1000,17 +1035,13 @@ async function submitNewVillage(event) {
 
     try {
         const newVillage = {
-            id: 'v' + Date.now(),
+            user_id: 1,
             name: villageName,
             icon: villageIcon,
-            assets: selectedAssets,
             type: villageType,
             goal: villageGoal,
-            totalValue: 0,
-            returnRate: 0,
-            allocation: 0,
-            notes: notes,
-            lastBriefingRead: null
+            assets: selectedAssets,
+            strategy_items: notes
         };
 
         const result = await fetchAPI('/villages', {

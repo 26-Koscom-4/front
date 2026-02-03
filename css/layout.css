@@ -1,6 +1,6 @@
 /* 공통 컨테이너 */
 .container {
-    max-width: 1200px;
+    max-width: 1250px;
     margin: 0 auto;
     padding: 20px;
 }
@@ -50,7 +50,7 @@ header .container {
 }
 
 .logo-image {
-    height: 50px;
+    height: 80px;
     width: auto;
     object-fit: contain;
     transition: transform 0.3s ease;
@@ -205,7 +205,7 @@ header .container {
 }
 
 .mobile-logo-image {
-    height: 35px;
+    height: 50px;
     width: auto;
 }
 

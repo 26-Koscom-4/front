@@ -25,7 +25,7 @@
         <div class="login-container">
             <div class="login-card">
                 <div class="login-logo">
-                    <img src="public/logo.png" alt="K-AMIs Logo" class="login-logo-image">
+                    <img src="public/logo2.png" alt="K-AMIs Logo" class="login-logo-image">
                 </div>
 
                 <h1 class="login-title">K-AMIs (캐미s)</h1>
@@ -72,7 +72,7 @@
     <header id="mainHeader" style="display: none;">
         <div class="container">
             <div class="logo" onclick="showPage('main')">
-                <img src="public/logo.png" alt="K-AMIs Logo" class="logo-image">
+                <img src="public/logo2.png" alt="K-AMIs Logo" class="logo-image">
                 <span class="logo-text">K-AMIs (캐미s)</span>
             </div>
 
@@ -102,7 +102,7 @@
         <div class="mobile-menu-content">
             <div class="mobile-menu-header">
                 <div class="mobile-menu-logo">
-                    <img src="public/logo.png" alt="K-AMIs Logo" class="mobile-logo-image">
+                    <img src="public/logo2.png" alt="K-AMIs Logo" class="mobile-logo-image">
                     <span class="mobile-logo-text">K-AMIs</span>
                 </div>
                 <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="닫기">&times;</button>
@@ -168,14 +168,15 @@
                     <img src="public/map.svg" alt="세계 지도" class="map-image">
 
                     <!-- 클릭 가능한 지역 핫스팟 -->
-                    <div class="map-hotspot hotspot-korea" onclick="showVillageDetail('국장마을')" title="한국">
+                    <div class="map-hotspot hotspot-korea" onclick="showVillageDetail('101')" title="한국">
                         <span class="hotspot-label">🇰🇷 한국</span>
                         <span class="unread-badge" id="badge-국장마을" style="display: none;">NEW</span>
                     </div>
-                    <div class="map-hotspot hotspot-usa" onclick="showVillageDetail('미장마을')" title="미국">
+                    <div class="map-hotspot hotspot-usa" onclick="showVillageDetail('102')" title="미국">
                         <span class="hotspot-label">🇺🇸 미국</span>
                         <span class="unread-badge" id="badge-미장마을" style="display: none;">NEW</span>
                     </div>
+                    <!--
                     <div class="map-hotspot hotspot-europe" onclick="showVillageDetail('배당마을')" title="유럽">
                         <span class="hotspot-label">🇪🇺 유럽</span>
                         <span class="unread-badge" id="badge-배당마을" style="display: none;">NEW</span>
@@ -184,7 +185,7 @@
                         <span class="hotspot-label">🌏 아시아</span>
                         <span class="unread-badge" id="badge-글로벌ETF마을" style="display: none;">NEW</span>
                     </div>
-
+                    -->
                     <!-- 추천 마을 핫스팟 -->
                     <div class="map-hotspot hotspot-recommendation" id="recommendationHotspot" style="display: none;" onclick="goToRecommendations()" title="새로운 추천">
                         <span class="hotspot-label">✨ 추천</span>
@@ -231,7 +232,7 @@
                 <button class="filter-tab active" onclick="filterVillages('all')">전체</button>
                 <button class="filter-tab" onclick="filterVillages('country')">국가별</button>
                 <button class="filter-tab" onclick="filterVillages('type')">유형별</button>
-                <button class="filter-tab" onclick="filterVillages('goal')">투자 성향별</button>
+                <!--<button class="filter-tab" onclick="filterVillages('goal')">투자 성향별</button>-->
                 <button class="filter-tab" onclick="filterVillages('custom')">사용자 지정</button>
                 <button class="add-village-button" onclick="openAddVillageModal()">+ 마을 추가</button>
             </div>
@@ -251,10 +252,12 @@
                     <p class="page-subtitle">나의 투자 현황을 한눈에 분석하세요</p>
                 </div>
                 <div class="download-buttons">
+                    <!--
                     <button class="download-btn excel" onclick="downloadExcel()">
                         <span class="download-icon">📊</span>
                         <span>Excel 다운로드</span>
                     </button>
+                    -->
                     <button class="download-btn pdf" onclick="downloadPDF()">
                         <span class="download-icon">📄</span>
                         <span>PDF 다운로드</span>
@@ -349,7 +352,7 @@
                         <button class="filter-tab active" onclick="filterBriefingVillages('all')">전체</button>
                         <button class="filter-tab" onclick="filterBriefingVillages('country')">국가별</button>
                         <button class="filter-tab" onclick="filterBriefingVillages('type')">유형별</button>
-                        <button class="filter-tab" onclick="filterBriefingVillages('goal')">투자 성향별</button>
+                        <!--<button class="filter-tab" onclick="filterBriefingVillages('goal')">투자 성향별</button>-->
                         <button class="filter-tab" onclick="filterBriefingVillages('custom')">사용자 지정</button>
                     </div>
                     <div class="village-selector-grid" id="villageSelectorGrid">
@@ -906,6 +909,7 @@
                     <div style="border: 2px solid var(--light); border-radius: 10px; padding: 15px; max-height: 200px; overflow-y: auto;">
                         <div id="assetCheckboxList" style="display: flex; flex-direction: column; gap: 10px;">
                             <!-- 목업 데이터 -->
+                            <!--
                             <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
                                 <input type="checkbox" name="villageAssets" value="AAPL" style="width: 18px; height: 18px; cursor: pointer;">
                                 <span>AAPL - Apple Inc. (기술주)</span>
@@ -930,6 +934,7 @@
                                 <input type="checkbox" name="villageAssets" value="SK하이닉스" style="width: 18px; height: 18px; cursor: pointer;">
                                 <span>SK하이닉스 (한국주식)</span>
                             </label>
+                            -->
                         </div>
                     </div>
                     <small class="helper-text">보유 중인 종목에서 선택하세요 (선택사항)</small>
@@ -1008,7 +1013,7 @@
                 <!-- 버튼 -->
                 <div class="mydata-buttons">
                     <button type="button" class="mydata-button secondary" onclick="closeAddVillageModal()">취소</button>
-                    <button type="submit" class="mydata-button primary">마을 추가</button>
+                    <button type="submit" class="mydata-button primary" >마을 추가</button>
                 </div>
             </form>
         </div>
