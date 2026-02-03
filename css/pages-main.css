@@ -178,10 +178,17 @@
 }
 
 .village-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 30px;
     margin-top: 40px;
+    justify-content: center;
+}
+
+.village-grid .village-card {
+    flex: 0 1 380px;
+    min-width: 280px;
+    max-width: 380px;
 }
 
 .village-card {

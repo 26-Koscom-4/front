@@ -1,5 +1,21 @@
 const API_BASE_URL = 'http://221.168.37.135:8000/api';
 
+// 로컬스토리지에서 마을 데이터 로드
+function getVillagesFromStorage() {
+    const stored = localStorage.getItem('userVillages');
+    if (stored) {
+        return JSON.parse(stored);
+    }
+    // 기본 sampleData를 로컬스토리지에 저장
+    localStorage.setItem('userVillages', JSON.stringify(sampleData.villages));
+    return sampleData.villages;
+}
+
+// 로컬스토리지에 마을 데이터 저장
+function saveVillagesToStorage(villages) {
+    localStorage.setItem('userVillages', JSON.stringify(villages));
+}
+
 // API 호출 함수
 async function fetchAPI(endpoint, options = {}) {
     // 실제 API 호출을 시뮬레이션하기 위한 지연
@@ -10,27 +26,39 @@ async function fetchAPI(endpoint, options = {}) {
     try {
         // 마을 목록 조회
         if (endpoint === '/villages' && (!options.method || options.method === 'GET')) {
-            return { villages: sampleData.villages };
+            return { villages: getVillagesFromStorage() };
         }
 
         // 마을 추가
         if (endpoint === '/villages' && options.method === 'POST') {
             const newVillage = JSON.parse(options.body);
             console.log('[API] 새 마을 추가:', newVillage);
+
+            // 로컬스토리지에서 현재 마을 목록 가져오기
+            const villages = getVillagesFromStorage();
+
+            // 새 마을 추가
+            villages.push(newVillage);
+
+            // 로컬스토리지에 저장
+            saveVillagesToStorage(villages);
+
             return { success: true, village: newVillage };
         }
 
         // 특정 마을 상세 정보
         if (endpoint.startsWith('/villages/')) {
             const villageId = endpoint.split('/')[2];
-            const village = sampleData.villages.find(v => v.id === villageId || v.name === villageId);
-            return village || sampleData.villages[0];
+            const villages = getVillagesFromStorage();
+            const village = villages.find(v => v.id === villageId || v.name === villageId);
+            return village || villages[0];
         }
 
         // 브리핑 데이터
         if (endpoint === '/briefing') {
+            const villages = getVillagesFromStorage();
             return {
-                villages: sampleData.villages.map(v => ({
+                villages: villages.map(v => ({
                     id: v.id,
                     name: v.name,
                     icon: v.icon,
@@ -91,18 +119,20 @@ async function fetchAPI(endpoint, options = {}) {
 
         // 메인 페이지 데이터
         if (endpoint === '/main') {
+            const villages = getVillagesFromStorage();
             return {
-                villages: sampleData.villages,
+                villages: villages,
                 recommendation: sampleData.recommendation
             };
         }
 
         // 포트폴리오 분석 데이터
         if (endpoint === '/analysis') {
+            const villages = getVillagesFromStorage();
             return {
-                villages: sampleData.villages,
-                totalAssets: sampleData.villages.reduce((sum, v) => sum + v.totalValue, 0),
-                totalReturn: (sampleData.villages.reduce((sum, v) => sum + v.returnRate, 0) / sampleData.villages.length).toFixed(2),
+                villages: villages,
+                totalAssets: villages.reduce((sum, v) => sum + (v.totalValue || 0), 0),
+                totalReturn: villages.length > 0 ? (villages.reduce((sum, v) => sum + (v.returnRate || 0), 0) / villages.length).toFixed(2) : 0,
                 riskLevel: 'moderate',
                 monthlyChange: 5.2
             };
@@ -110,10 +140,11 @@ async function fetchAPI(endpoint, options = {}) {
 
         // 마이페이지 데이터
         if (endpoint === '/mypage') {
+            const villages = getVillagesFromStorage();
             return {
                 userProfile: sampleData.userProfile,
                 settings: sampleData.settings,
-                villages: sampleData.villages,
+                villages: villages,
                 investment_test: {
                     completed: false
                 }

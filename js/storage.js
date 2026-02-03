@@ -1,7 +1,11 @@
 function loadData() {
-    console.warn('loadData()는 더 이상 사용되지 않습니다. API를 사용하세요.');
-    const data = localStorage.getItem('antVillageData');
-    return data ? JSON.parse(data) : sampleData;
+    // 로컬스토리지에서 마을 데이터 로드
+    const villages = localStorage.getItem('userVillages');
+    const data = { ...sampleData };
+    if (villages) {
+        data.villages = JSON.parse(villages);
+    }
+    return data;
 }
 
 // 데이터 초기화 함수 (디버깅용)

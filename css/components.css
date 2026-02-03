@@ -372,3 +372,31 @@
     margin-top: 2px;
 }
 
+/* 종목 선택 스크롤 컨테이너 */
+.asset-scroll-container {
+    border: 2px solid var(--light);
+    border-radius: 10px;
+    padding: 15px;
+    max-height: 180px;
+    overflow-y: scroll;
+    background: var(--light);
+}
+
+.asset-scroll-container::-webkit-scrollbar {
+    width: 8px;
+}
+
+.asset-scroll-container::-webkit-scrollbar-track {
+    background: var(--light);
+    border-radius: 4px;
+}
+
+.asset-scroll-container::-webkit-scrollbar-thumb {
+    background: var(--text-light);
+    border-radius: 4px;
+}
+
+.asset-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+}
+

@@ -24,10 +24,8 @@ async function renderVillages(filterType = 'all') {
             renderVillagesByCountry(data.villages, grid);
         } else if (filterType === 'type') {
             renderVillagesByType(data.villages, grid);
-        } else if (filterType === 'goal') {
-            renderVillagesByGoal(data.villages, grid);
         } else if (filterType === 'custom') {
-            renderVillageCards(data.villages, grid);
+            renderVillagesByCustom(data.villages, grid);
         }
     } catch (error) {
         grid.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--danger);">마을 목록을 불러오는데 실패했습니다.</div>';
@@ -91,21 +89,24 @@ function renderVillagesByType(villages, grid) {
     const typeVillages = villages.filter(village => {
         // 국가 관련 마을 제외
         const isCountryVillage = village.name.includes('한국') || village.name.includes('국장') || village.icon.includes('🇰🇷') ||
-                                 village.name.includes('미국') || village.name.includes('미장') || village.icon.includes('🇺🇸') ||
-                                 village.name.includes('글로벌') || village.icon.includes('🌍');
+                                 village.name.includes('레버리지') || village.name.includes('미장') || village.icon.includes('🇺🇸') ||
+                                 village.name.includes('글로벌') || village.icon.includes('단기') ||
+                                 village.name.includes('장기') || village.icon.includes('단타') ||
+                                 village.name.includes('장투') || village.icon.includes('ㄴㅇㄹ');
+                                 
         return !isCountryVillage;
     });
 
     renderVillageCards(typeVillages, grid);
 }
 
-// 투자 성향별 필터링 (배당, 레버리지, 장투, 단타만)
-function renderVillagesByGoal(villages, grid) {
+// 사용자 지정 마을 필터링
+function renderVillagesByCustom(villages, grid) {
     const goalVillages = villages.filter(village => {
-        return village.name.includes('배당') ||
-               village.name.includes('레버리지') ||
-               village.name.includes('장투') ||
-               village.name.includes('단타');
+        return village.name.includes('레버리지') ||
+            village.name.includes('장투') ||
+            village.name.includes('단타') ||
+            village.name.includes('장기');
     });
 
     renderVillageCards(goalVillages, grid);
