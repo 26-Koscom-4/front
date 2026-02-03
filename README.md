@@ -42,7 +42,7 @@
 - 상관관계 분석을 통한 리스크 관리
 - 원클릭 마을 추가
 
-### 🔗 마이데이터 연동
+### 🔗 마이데이터 연동 (Mock)
 - 금융기관 자산 자동 연동
 - 4단계 연동 프로세스
 - 실시간 자산 동기화
@@ -348,25 +348,15 @@ resetData();
 ## 🎯 향후 계획
 
 - [ ] 실제 증권 API 연동
-- [ ] 백엔드 서버 구축
+- [O] 백엔드 서버 구축
 - [ ] 사용자 인증 시스템
 - [ ] 실시간 주가 업데이트
 - [ ] 푸시 알림
-- [ ] 다크모드 완전 지원
+- [O] 다크모드 완전 지원
 - [ ] 다국어 지원 (영어, 일본어)
 - [ ] PWA 변환
 - [ ] 소셜 로그인
 - [ ] 포트폴리오 백테스팅
-
-## 🤝 기여하기
-
-프로젝트 개선에 기여하고 싶으시다면:
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ### 코딩 컨벤션
 - **JavaScript**: ESLint (Airbnb Style Guide)
@@ -379,14 +369,16 @@ resetData();
 
 ## 👥 팀
 
-- **개발**: Claude Sonnet 4.5 with Human Developer
-- **디자인**: Material Design + Custom Theme
-- **기획**: Individual Investors ("Ants") Insights
+- **백엔드 & 인프라**: 김병수 사원 [IT]
+- **AI 에이전트**: 이정욱 사원 [IT]
+- **프론트**: 박상욱 사원 [IT]
+- **디자인**: 박상욱 사원 [IT]
+- **기획**: 박경연 사원 [경영]
 
 ## 📞 문의
 
 - **이슈**: [GitHub Issues](https://github.com/26-Koscom-4/front/issues)
-- **이메일**: contact@k-amis.com (가상)
+- **이메일**: dkxkqkrtkddn@naver.com
 
 ## 🙏 감사의 말
 
