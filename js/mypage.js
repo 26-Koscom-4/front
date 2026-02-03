@@ -3,7 +3,7 @@
 async function loadMypage() {
     try {
         const data = await fetchAPI('/mypage');
-        const asset_data = fetchAPI('/portfolio/summary?user_id=1');
+        const asset_data = await fetchAPI('/portfolio/summary?user_id=1');
 
         // 프로필 정보 로드
         document.getElementById('userName').value = data.userProfile?.name || '김직장';
@@ -30,7 +30,7 @@ async function loadMypage() {
         applyFontSize(data.settings?.font_size || 16);
 
         // 통계 정보 계산 및 표시
-        updateStatistics(data);
+        updateStatistics(asset_data);
 
         // 자산 연동 상태 업데이트
         updateIntegrationStatus(asset_data);
@@ -48,6 +48,7 @@ async function loadMypage() {
 
 // 통계 정보 업데이트
 function updateStatistics(data) {
+    /*
     if (!data.villages || data.villages.length === 0) {
         document.getElementById('statTotalAssets').textContent = '0원';
         document.getElementById('statVillageCount').textContent = '0개';
@@ -55,6 +56,7 @@ function updateStatistics(data) {
         document.getElementById('statAssetCount').textContent = '0개';
         return;
     }
+    */
 
     // 총 자산
     // const totalAssets = data.villages.reduce((sum, v) => sum + (v.totalValue || 0), 0);

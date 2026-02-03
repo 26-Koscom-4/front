@@ -4,12 +4,13 @@ let currentBriefingFilter = 'all';
 let cachedBriefingVillages = [];
 
 async function renderVillages(filterType = 'all') {
+
     currentFilter = filterType;
     const grid = document.getElementById('villageGrid');
     grid.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
 
     try {
-        const data = await fetchAPI('/villages');
+        const data = await fetchAPI('/villages/all?user_id=1');
         grid.innerHTML = '';
 
         if (!data.villages || data.villages.length === 0) {
@@ -41,8 +42,8 @@ function renderVillageCards(villages, grid) {
             card.className = 'village-card fade-in';
             card.onclick = () => showVillageDetail(village.id, village.name);
 
-            const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
-            const returnSign = village.returnRate >= 0 ? '+' : '';
+            const returnClass = village.return_rate >= 0 ? 'positive' : 'negative';
+            const returnSign = village.return_rate >= 0 ? '+' : '';
 
             card.innerHTML = `
                 <div class="village-header">
@@ -52,22 +53,22 @@ function renderVillageCards(villages, grid) {
                 <div class="village-stats">
                     <div class="stat-row">
                         <span class="stat-label">총 자산</span>
-                        <span class="stat-value">${village.totalValue.toLocaleString()}원</span>
+                        <span class="stat-value">${village.total_assets.toLocaleString()}원</span>
                     </div>
                     <div class="stat-row">
                         <span class="stat-label">수익률</span>
-                        <span class="stat-value ${returnClass}">${returnSign}${village.returnRate}%</span>
+                        <span class="stat-value ${returnClass}">${returnSign}${village.return_rate}%</span>
                     </div>
                     <div class="stat-row">
                         <span class="stat-label">포트폴리오 비중</span>
-                        <span class="stat-value">${village.allocation}%</span>
+                        <span class="stat-value">${village.portfolio_weight}%</span>
                     </div>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${village.allocation}%"></div>
+                    <div class="progress-fill" style="width: ${village.portfolio_weight}%"></div>
                 </div>
                 <div class="assets-list">
-                    ${village.assets.map(asset => `<span class="asset-tag">${typeof asset === 'string' ? asset : asset.name}</span>`).join('')}
+                    ${village.asset_tickers.map(asset => `<span class="asset-tag">${typeof asset === 'string' ? asset : asset}</span>`).join('')}
                 </div>
             `;
 
@@ -138,10 +139,10 @@ async function showVillageDetail(villageId, villageName) {
             '국장마을': '🇰🇷',
             '미장마을': '🇺🇸',
             '배당마을': '💰',
-            '글로벌ETF마을': '🌍',
+            '주식마을': '📈',
+            'ETF마을': '🌍',
         }
 
-        // TODO AI 한줄 평 분석 추가
         content.innerHTML = `
             <h2 style="color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
                 <span style="font-size: 48px;">${icon[data.village.name]}</span>
@@ -194,7 +195,7 @@ async function showVillageDetail(villageId, villageName) {
             </div>
 
             <div style="display: flex; gap: 10px; margin-top: 25px;">
-                <button class="audio-button" onclick="goToVillageAndCloseModal('${data.village.name}')" style="flex: 1; background: var(--success);">
+                <button class="audio-button" onclick="goToVillageAndCloseModal('${villageId}')" style="flex: 1; background: var(--success);">
                     🏘️ 마을로 이동
                 </button>
                 <button class="audio-button" onclick="closeModal()" style="flex: 1; background: var(--text-light);">
@@ -215,10 +216,10 @@ function closeModal() {
 }
 
 // 모달을 닫고 마을로 이동
-function goToVillageAndCloseModal(villageName) {
+function goToVillageAndCloseModal(villageId) {
     closeModal();
     setTimeout(() => {
-        goToVillage(villageName);
+        goToVillage(villageId);
     }, 300); // 모달 닫기 애니메이션 대기
 }
 
@@ -226,9 +227,9 @@ function goToVillageAndCloseModal(villageName) {
 let villageReturnChart = null;
 
 // 마을로 이동 (마을 분석 페이지)
-function goToVillage(villageName) {
-    const data = loadData();
-    const village = data.villages.find(v => v.name === villageName);
+async function goToVillage(villageId) {
+    const data = await fetchAPI(`/villages/${villageId}/detail?user_id=1`);
+    const village = data.village;
 
     if (village) {
         // 마을 이름 및 아이콘 업데이트
@@ -239,35 +240,40 @@ function goToVillage(villageName) {
         }
 
         // 마을 요약 정보 업데이트
-        document.getElementById('villageAnalysisTotalValue').textContent = village.totalValue.toLocaleString() + '원';
+        document.getElementById('villageAnalysisTotalValue').textContent = data.summary_cards.total_assets.toLocaleString() + '원';
         const returnRateElement = document.getElementById('villageAnalysisReturnRate');
-        returnRateElement.textContent = (village.returnRate >= 0 ? '+' : '') + village.returnRate + '%';
-        returnRateElement.style.color = village.returnRate >= 0 ? 'var(--success)' : 'var(--danger)';
-        document.getElementById('villageAnalysisAssetCount').textContent = village.assets.length + '개';
+        returnRateElement.textContent = (data.summary_cards.current_return_rate >= 0 ? '+' : '') + data.summary_cards.current_return_rate + '%';
+        returnRateElement.style.color = data.summary_cards.current_return_rate >= 0 ? 'var(--success)' : 'var(--danger)';
+        document.getElementById('villageAnalysisAssetCount').textContent = data.summary_cards.holding_count + '개';
 
         // 수익률 차트 렌더링
-        renderVillageReturnChart(village);
+        renderVillageReturnChart(data);
 
         // 보유 자산 목록
         const assetsContainer = document.getElementById('villageAnalysisAssets');
-        assetsContainer.innerHTML = village.assets.map(asset => {
+        assetsContainer.innerHTML = data.holdings.items.map(asset => {
             const assetName = typeof asset === 'string' ? asset : asset.name;
-            const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
+            const assetType = typeof asset === 'string' ? '' : ` (${asset.category})`;
             const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value.toLocaleString()}원`;
             return `<p style="margin: 8px 0;">• <strong>${assetName}</strong>${assetType}${assetValue}</p>`;
         }).join('');
 
         // AI 포트폴리오 분석
+        // TODO Mock
+        /*
         document.getElementById('villageAnalysisAdvice').innerHTML = `
             <p>${getVillageAdvice(village)}</p>
             ${getMarketAdvice(village)}
         `;
+        */
 
         // AI 포트폴리오 리밸런싱
+        /*
         document.getElementById('villageAnalysisRebalancing').innerHTML = generateRebalancingContent(village);
+        */
 
         // 브리핑 읽음 처리
-        markBriefingAsRead(villageName);
+        //markBriefingAsRead(villageName);
 
         // 마을 분석 페이지로 이동
         showPage('daily');
@@ -568,7 +574,7 @@ async function renderVillageSelector() {
     grid.innerHTML = '<div style="text-align: center; padding: 40px;">로딩 중...</div>';
 
     try {
-        const data = await fetchAPI('/briefing');
+        const data = await fetchAPI('/villages/all?user_id=1');
         console.log('[DEBUG] 브리핑 데이터:', data);
 
         grid.innerHTML = '';
