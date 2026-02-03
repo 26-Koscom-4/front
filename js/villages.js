@@ -488,7 +488,15 @@ function getVillageGoalText(goal) {
 // 마을별 조언 생성
 function getVillageAdvice(village) {
     const adviceMap = {
-        'growth': '성장주는 장기적인 관점에서 접근하세요. 단기 변동성에 흔들리지 마세요.',
+        'growth': '<strong>레버리지 노출 완화</strong>' +
+            '<br>TQQQ·UPRO 등 레버리지 ETF 비중이 있어 변동성이 확대될 수있습니다.</li>' +
+            '<br>단기 변동 구간에서는 비중을 점검하세요.<br>' +
+            '<strong> 단일 종목 집중 관리</strong> ' +
+            '<br>NVDA와 TSLA 비중이 높아 특정 종목 리스크가 커질 수 있습니다. ' +
+            '<br>상위 종목 비중을 점검하세요.<br>' +
+            '<strong> 현금흐름 보완</strong> ' +
+            '<br>배당 성격의 SCHD 비중이 상대적으로 낮습니다. ' +
+            '<br>변동성 완화를 위해 배당/방어형 비중을 늘리는 방안을 고려해보세요.',
         'dividend': '배당주는 꾸준한 현금 흐름을 제공합니다. 배당락일을 체크하세요.',
         'leverage': '⚠️ 레버리지 상품은 높은 변동성을 가집니다. 리스크 관리에 주의하세요.',
         'domestic': '국내 시장 뉴스와 정책 변화를 주시하세요.',
@@ -668,9 +676,9 @@ const villageNewsMap = {
         { title: '리츠(REITs) 시장 회복 조짐', summary: '금리 인하 전망이 부동산 리츠 시장의 회복을 견인하고 있습니다.', time: '5시간 전' }
     ],
     'leverage': [
-        { title: 'VIX 지수 급등, 변동성 확대', summary: '글로벌 지정학적 리스크로 VIX 지수가 급등하며 변동성이 확대되고 있습니다.', time: '30분 전' },
-        { title: '레버리지 ETF 거래량 급증', summary: '시장 변동성 확대 속 레버리지/인버스 ETF 거래량이 크게 늘었습니다.', time: '2시간 전' },
-        { title: '선물 시장 롤오버 일정 안내', summary: '이번 주 주요 선물 만기일이 다가오고 있어 롤오버에 유의하세요.', time: '4시간 전' }
+        { title: '하루만에 -60% \'대참사\'', summary: '개미 지난달 미래에셋 레버리지 ETN 1조 넘게 순매', time: '11시간 전' },
+        { title: 'ETF 거래대금, 코스닥과 어깨 나란히', summary: '지난달 ETF 일평균 거래대금 14조원 넘기며 사상 최대 코스닥과 비슷한 수준…', time: '11시간 전' },
+        { title: '변동성 장세 ‘손실 폭탄’', summary: '이달 들어 국내 증시 변동성이 커진 가운데 레버리지 상장지수펀드(ETF)의 구조적 위험성이 재조명되고 있다.', time: '10시간 전' }
     ],
     'domestic': [
         { title: '코스피 외국인 순매수 전환', summary: '외국인 투자자가 3거래일 연속 코스피 순매수를 기록했습니다.', time: '1시간 전' },
@@ -817,7 +825,10 @@ function getMarketAdvice(village) {
     const adviceMap = {
         'growth': '<p style="margin-top: 10px;">📈 기술주 중심 포트폴리오입니다. 실적 발표 시즌을 주목하세요.</p>',
         'dividend': '<p style="margin-top: 10px;">💰 배당락일 3일 전입니다. 배당 수익 예상액을 확인하세요.</p>',
-        'leverage': '<p style="margin-top: 10px;">⚠️ VIX 지수가 상승 중입니다. 포지션 조정을 고려하세요.</p>',
+        'leverage': '<p style="margin-top: 15px;">⬇️ 하락세 주의하세요.</p>' +
+            '<p style="margin-top: 10px;">👀 변동성 증가에 유의하세요.</p>' +
+            '<p style="margin-top: 10px;">😊 122630.KS, 15.62% 상승. KODEX ETF 성과 긍정적.</p>' +
+            '<p style="margin-top: 10px;">🚨 TQQQ, 3.54% 하락. 시장 하락 리스크 확대.</p>',
         'domestic': '<p style="margin-top: 10px;">🇰🇷 오늘 국내 증시는 외국인 수급에 주목하세요.</p>',
         'etf': '<p style="margin-top: 10px;">🌍 글로벌 시장이 안정세를 보이고 있습니다.</p>',
         'semiconductor': '<p style="margin-top: 10px;">🔬 반도체 업황 지표와 수주 동향을 체크하세요.</p>'
