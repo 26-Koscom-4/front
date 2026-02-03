@@ -92,7 +92,7 @@ function renderVillagesByType(villages, grid) {
                                  village.name.includes('레버리지') || village.name.includes('미장') || village.icon.includes('🇺🇸') ||
                                  village.name.includes('글로벌') || village.icon.includes('단기') ||
                                  village.name.includes('장기') || village.icon.includes('단타') ||
-                                 village.name.includes('장투') || village.icon.includes('ㄴㅇㄹ');
+                                 village.name.includes('장투') || village.isCustom === true;
                                  
         return !isCountryVillage;
     });
@@ -103,10 +103,7 @@ function renderVillagesByType(villages, grid) {
 // 사용자 지정 마을 필터링
 function renderVillagesByCustom(villages, grid) {
     const goalVillages = villages.filter(village => {
-        return village.name.includes('레버리지') ||
-            village.name.includes('장투') ||
-            village.name.includes('단타') ||
-            village.name.includes('장기');
+        return village.isCustom === true;
     });
 
     renderVillageCards(goalVillages, grid);
@@ -238,10 +235,79 @@ function renderVillageReturnChart(village) {
     // 기존 차트 삭제
     if (villageReturnChart) {
         villageReturnChart.destroy();
+        villageReturnChart = null;
     }
 
     // 데이터: 최근 12개월 수익률
     const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
+
+    // 사용자가 만든 마을인 경우 빈 차트 표시
+    if (village.isCustom) {
+        const ctx = canvas.getContext('2d');
+        villageReturnChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: '월별 수익률 (%)',
+                    data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: 'rgba(200, 200, 200, 0.3)',
+                    borderColor: 'rgba(200, 200, 200, 0.5)',
+                    borderWidth: 1,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 14, family: "'Pretendard', sans-serif" },
+                            color: '#999'
+                        }
+                    },
+                    tooltip: { enabled: false },
+                    // 차트 중앙에 메시지 표시
+                    annotation: {
+                        annotations: {}
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 10,
+                        ticks: {
+                            callback: function(value) { return value + '%'; },
+                            color: '#999'
+                        }
+                    },
+                    x: {
+                        ticks: { color: '#999' }
+                    }
+                }
+            },
+            plugins: [{
+                id: 'noDataMessage',
+                afterDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const width = chart.width;
+                    const height = chart.height;
+
+                    ctx.save();
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.font = "16px 'Pretendard', sans-serif";
+                    ctx.fillStyle = '#999';
+                    ctx.fillText('아직 수익률 데이터가 없습니다', width / 2, height / 2);
+                    ctx.restore();
+                }
+            }]
+        });
+        return;
+    }
 
     // 마을 유형에 따라 다른 패턴의 데이터 생성
     let returnData;
@@ -434,26 +500,27 @@ function getVillageAdvice(village) {
 
 // 브리핑 마을 필터링 로직
 function filterBriefingVillageList(villages, filterType) {
-    if (filterType === 'all' || filterType === 'custom') return villages;
+
+    if (filterType === 'all') return villages;
     if (filterType === 'country') {
         return villages.filter(v =>
             v.name.includes('한국') || v.name.includes('국장') || v.icon.includes('🇰🇷') ||
             v.name.includes('미국') || v.name.includes('미장') || v.icon.includes('🇺🇸') ||
-            v.name.includes('글로벌') || v.name.includes('ETF') || v.icon.includes('🌍'));
+            v.name.includes('글로벌') || v.name.includes('ETF'));
     }
     if (filterType === 'type') {
         return villages.filter(v => {
             const isCountry = v.name.includes('한국') || v.name.includes('국장') || v.icon.includes('🇰🇷') ||
-                              v.name.includes('미국') || v.name.includes('미장') || v.icon.includes('🇺🇸') ||
-                              v.name.includes('글로벌') || v.icon.includes('🌍');
+                v.name.includes('미국') || v.name.includes('미장') || v.icon.includes('🇺🇸') ||
+                v.name.includes('글로벌') || v.icon.includes('🌍') || v.isCustom === true;
             return !isCountry;
         });
     }
-    if (filterType === 'goal') {
-        return villages.filter(v =>
-            v.name.includes('배당') || v.name.includes('레버리지') ||
-            v.name.includes('장투') || v.name.includes('단타'));
+    if (filterType === 'custom') {
+
+        return villages.filter(v => v.isCustom === true );
     }
+
     return villages;
 }
 
@@ -765,8 +832,8 @@ function generateRebalancingContent(village) {
 
     let assetBalanceHtml = village.assets.map(asset => {
         const assetName = typeof asset === 'string' ? asset : asset.name;
-        const currentWeight = idealAllocation + Math.round((Math.random() - 0.5) * 10);
-        const diff = currentWeight - idealAllocation;
+        const currentWeight = Math.round(asset.value / village.totalValue * 100,1);
+        const diff = Math.round(currentWeight - idealAllocation);
         const diffSign = diff >= 0 ? '+' : '';
         const diffColor = Math.abs(diff) > 5 ? 'var(--danger)' : 'var(--success)';
         return `<p style="margin: 6px 0;">• <strong>${assetName}</strong>: 현재 ${currentWeight}% → 목표 ${idealAllocation}% <span style="color: ${diffColor}; font-weight: 600;">(${diffSign}${diff}%)</span></p>`;
@@ -1063,7 +1130,8 @@ async function submitNewVillage(event) {
             allocation: allocation,
             notes: notes,
             lastBriefingRead: null,
-            comment: 'AI가 요약을 생성중입니다.'
+            comment: 'AI가 요약을 생성중입니다.',
+            isCustom: true  // 사용자가 만든 마을 표시
         };
 
         const result = await fetchAPI('/villages', {

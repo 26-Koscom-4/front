@@ -68,6 +68,7 @@ async function fetchAPI(endpoint, options = {}) {
                     assets: v.assets,
                     type: v.type,
                     goal: v.goal,
+                    isCustom: v.isCustom,
                     briefing: `${v.name}의 오늘 브리핑입니다. 현재 수익률은 ${v.returnRate}%입니다.`
                 }))
             };
