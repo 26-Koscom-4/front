@@ -81,9 +81,9 @@ function updateNavigationState(pageName) {
     const pageButtonMap = {
         'main': 0,
         'villages': 1,
-        'analysis': 2,
-        'briefing': 3,
-        'neighbors': 4,
+        'briefing': 2,
+        'neighbors': 3,
+        'analysis': 4,
         'mypage': 5
     };
 

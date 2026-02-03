@@ -1,5 +1,7 @@
 // 현재 필터 상태 저장
 let currentFilter = 'all';
+let currentBriefingFilter = 'all';
+let cachedBriefingVillages = [];
 
 async function renderVillages(filterType = 'all') {
     currentFilter = filterType;
@@ -462,6 +464,68 @@ function getVillageAdvice(village) {
     return adviceMap[village.type] || '꾸준한 모니터링과 리밸런싱을 권장합니다.';
 }
 
+// 브리핑 마을 필터링 로직
+function filterBriefingVillageList(villages, filterType) {
+    if (filterType === 'all' || filterType === 'custom') return villages;
+    if (filterType === 'country') {
+        return villages.filter(v =>
+            v.name.includes('한국') || v.name.includes('국장') || v.icon.includes('🇰🇷') ||
+            v.name.includes('미국') || v.name.includes('미장') || v.icon.includes('🇺🇸') ||
+            v.name.includes('글로벌') || v.name.includes('ETF') || v.icon.includes('🌍'));
+    }
+    if (filterType === 'type') {
+        return villages.filter(v => {
+            const isCountry = v.name.includes('한국') || v.name.includes('국장') || v.icon.includes('🇰🇷') ||
+                              v.name.includes('미국') || v.name.includes('미장') || v.icon.includes('🇺🇸') ||
+                              v.name.includes('글로벌') || v.icon.includes('🌍');
+            return !isCountry;
+        });
+    }
+    if (filterType === 'goal') {
+        return villages.filter(v =>
+            v.name.includes('배당') || v.name.includes('레버리지') ||
+            v.name.includes('장투') || v.name.includes('단타'));
+    }
+    return villages;
+}
+
+// 브리핑 필터 탭 변경
+function filterBriefingVillages(filterType) {
+    currentBriefingFilter = filterType;
+
+    document.querySelectorAll('.briefing-filter-tabs .filter-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    event.target.classList.add('active');
+
+    const grid = document.getElementById('villageSelectorGrid');
+    grid.innerHTML = '';
+
+    const filtered = filterBriefingVillageList(cachedBriefingVillages, filterType);
+
+    if (filtered.length === 0) {
+        grid.innerHTML = '<div style="text-align: center; padding: 40px;">해당 필터에 맞는 마을이 없습니다.</div>';
+        return;
+    }
+
+    filtered.forEach(village => {
+        const card = document.createElement('div');
+        card.className = 'village-selector-card';
+        card.onclick = () => selectVillageForBriefing(village.name, village);
+
+        const returnClass = village.returnRate >= 0 ? 'positive' : 'negative';
+        const returnSign = village.returnRate >= 0 ? '+' : '';
+
+        card.innerHTML = `
+            <div class="village-selector-icon">${village.icon}</div>
+            <div class="village-selector-name">${village.name}</div>
+            <div class="village-selector-return ${returnClass}">${returnSign}${village.returnRate}%</div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
 // 브리핑 페이지 렌더링
 async function renderBriefing() {
     console.log('[DEBUG] renderBriefing 시작');
@@ -500,9 +564,12 @@ async function renderVillageSelector() {
             return;
         }
 
+        cachedBriefingVillages = data.villages;
         console.log(`[DEBUG] ${data.villages.length}개의 마을 렌더링 중...`);
 
-        data.villages.forEach(village => {
+        const filtered = filterBriefingVillageList(data.villages, currentBriefingFilter);
+
+        filtered.forEach(village => {
             const card = document.createElement('div');
             card.className = 'village-selector-card';
             card.onclick = () => selectVillageForBriefing(village.name, village);

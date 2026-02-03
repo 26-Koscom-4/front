@@ -87,9 +87,9 @@
             <nav class="desktop-nav">
                 <button onclick="showPage('main')">홈</button>
                 <button onclick="showPage('villages')">마을 관리</button>
-                <button onclick="showPage('analysis')">포트폴리오 분석</button>
                 <button onclick="showPage('briefing')">일일 브리핑</button>
                 <button onclick="showPage('neighbors')">이웃 마을</button>
+                <button onclick="showPage('analysis')">포트폴리오 분석</button>
                 <button onclick="showPage('mypage')">마이페이지</button>
                 <button onclick="logout()" class="logout-button">로그아웃</button>
             </nav>
@@ -345,6 +345,13 @@
                 <!-- 마을 선택 섹션 -->
                 <div class="village-selector">
                     <h3 style="text-align: center; color: var(--primary); margin-bottom: 20px;">🏘️ 마을 선택</h3>
+                    <div class="briefing-filter-tabs">
+                        <button class="filter-tab active" onclick="filterBriefingVillages('all')">전체</button>
+                        <button class="filter-tab" onclick="filterBriefingVillages('country')">국가별</button>
+                        <button class="filter-tab" onclick="filterBriefingVillages('type')">유형별</button>
+                        <button class="filter-tab" onclick="filterBriefingVillages('goal')">투자 성향별</button>
+                        <button class="filter-tab" onclick="filterBriefingVillages('custom')">사용자 지정</button>
+                    </div>
                     <div class="village-selector-grid" id="villageSelectorGrid">
                         <!-- JavaScript로 동적 생성 -->
                     </div>

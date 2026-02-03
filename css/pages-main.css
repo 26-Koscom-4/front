@@ -81,6 +81,14 @@
     border-color: var(--primary);
 }
 
+.briefing-filter-tabs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
 .add-village-button {
     background: var(--success);
     border: none;
