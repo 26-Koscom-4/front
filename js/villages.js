@@ -676,9 +676,9 @@ const villageNewsMap = {
         { title: '리츠(REITs) 시장 회복 조짐', summary: '금리 인하 전망이 부동산 리츠 시장의 회복을 견인하고 있습니다.', time: '5시간 전' }
     ],
     'leverage': [
-        { title: '하루만에 -60% \'대참사\'', summary: '개미 지난달 미래에셋 레버리지 ETN 1조 넘게 순매', time: '11시간 전' },
-        { title: 'ETF 거래대금, 코스닥과 어깨 나란히', summary: '지난달 ETF 일평균 거래대금 14조원 넘기며 사상 최대 코스닥과 비슷한 수준…', time: '11시간 전' },
-        { title: '변동성 장세 ‘손실 폭탄’', summary: '이달 들어 국내 증시 변동성이 커진 가운데 레버리지 상장지수펀드(ETF)의 구조적 위험성이 재조명되고 있다.', time: '10시간 전' }
+        { title: '하루만에 -60% \'대참사\'', summary: '개미 지난달 미래에셋 레버리지 ETN 1조 넘게 순매', time: '11시간 전', url: "https://n.news.naver.com/article/015/0005245931" },
+        { title: 'ETF 거래대금, 코스닥과 어깨 나란히', summary: '지난달 ETF 일평균 거래대금 14조원 넘기며 사상 최대 코스닥과 비슷한 수준…', time: '11시간 전' ,"url": "https://n.news.naver.com/article/014/0005472722"},
+        { title: '변동성 장세 ‘손실 폭탄’', summary: '이달 들어 국내 증시 변동성이 커진 가운데 레버리지 상장지수펀드(ETF)의 구조적 위험성이 재조명되고 있다.', time: '10시간 전', url:"https://m.dnews.co.kr/m_home/view.jsp?idxno=202602031058063250394"}
     ],
     'domestic': [
         { title: '코스피 외국인 순매수 전환', summary: '외국인 투자자가 3거래일 연속 코스피 순매수를 기록했습니다.', time: '1시간 전' },
@@ -773,13 +773,18 @@ function generateVillageBriefingContent(village) {
 
     // 섹션 5: 마을별 최신 뉴스
     const news = villageNewsMap[village.type] || villageNewsMap['growth'];
-    const newsHtml = news.map(n => `
+    const newsHtml = news.map(n => {
+        const titleHtml = n.url
+            ? `<a href="${n.url}" target="_blank" rel="noopener noreferrer" style="font-weight: 700; margin-bottom: 4px; color: var(--primary); text-decoration: none; display: block;">${n.title} 🔗</a>`
+            : `<p style="font-weight: 700; margin-bottom: 4px;">${n.title}</p>`;
+        return `
         <div style="padding: 12px 0; border-bottom: 1px solid var(--light);">
-            <p style="font-weight: 700; margin-bottom: 4px;">${n.title}</p>
+            ${titleHtml}
             <p style="color: var(--text-light); font-size: 14px; margin-bottom: 4px;">${n.summary}</p>
             <p style="color: var(--text-light); font-size: 12px;">🕐 ${n.time}</p>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     // 섹션 6: 오늘의 AI 조언
     const villageAdvice = getVillageAdvice(village);
