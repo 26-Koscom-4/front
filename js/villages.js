@@ -242,7 +242,7 @@ function renderVillageReturnChart(village) {
     const months = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'];
 
     // 사용자가 만든 마을인 경우 빈 차트 표시
-    if (village.isCustom) {
+    if (village.isCustom && village.id !== 'v3') {
         const ctx = canvas.getContext('2d');
         villageReturnChart = new Chart(ctx, {
             type: 'bar',
@@ -689,6 +689,12 @@ const villageNewsMap = {
     ]
 };
 
+// holdings 배열에서 종목 데이터 찾기
+function findHoldingByName(name) {
+    const holdings = sampleData.holdings || [];
+    return holdings.find(h => h.name === name);
+}
+
 // 마을별 브리핑 내용 생성
 function generateVillageBriefingContent(village) {
     if (!village) return '<p>마을 데이터를 불러올 수 없습니다.</p>';
@@ -705,44 +711,50 @@ function generateVillageBriefingContent(village) {
     const profitLossClass = profitLoss >= 0 ? 'positive' : 'negative';
     const profitLossSign = profitLoss >= 0 ? '+' : '';
 
-    // 섹션 2: 전일대비 등락 수익률 (가중평균)
+    // 섹션 2: 전일대비 등락 수익률 (holdings에서 가중평균)
     let villageDailyReturn = 0;
     let dailyCount = 0;
+    let totalWeight = 0;
+
     assets.forEach(asset => {
-        if (typeof asset !== 'string' && asset.dailyReturn != null) {
-            villageDailyReturn += asset.dailyReturn;
-            dailyCount++;
+        const assetName = typeof asset === 'string' ? asset : (asset.name ?? null);
+        if (assetName) {
+            const holding = findHoldingByName(assetName);
+            if (holding && holding.dailyReturn != null) {
+                const weight = holding.value || 1;
+                villageDailyReturn += holding.dailyReturn * weight;
+                totalWeight += weight;
+                dailyCount++;
+            }
         }
     });
-    if (dailyCount === 0) {
-        // 종목별 dailyReturn이 없으면 랜덤 생성
-        villageDailyReturn = parseFloat(((Math.random() - 0.4) * 3).toFixed(2));
-    } else {
-        villageDailyReturn = parseFloat((villageDailyReturn / dailyCount).toFixed(2));
+
+    if (totalWeight > 0) {
+        villageDailyReturn = parseFloat((villageDailyReturn / totalWeight).toFixed(2));
+    } else if (dailyCount === 0) {
+        villageDailyReturn = 0;
     }
     const dailyClass = villageDailyReturn >= 0 ? 'positive' : 'negative';
     const dailySign = villageDailyReturn >= 0 ? '+' : '';
 
-    // 섹션 3 & 4: 보유 종목별 수익률
+    // 섹션 3: 보유 종목별 총 수익률 (holdings에서 조회)
     const assetTotalReturnHtml = assets.map(asset => {
         const name = typeof asset === 'string' ? asset : (asset.name ?? '알 수 없음');
-        // 총 수익률
-        const mockReturn = typeof asset === 'string'
-            ? parseFloat(((Math.random() - 0.3) * 30).toFixed(2))
-            : (asset.returnRate ?? parseFloat(((Math.random() - 0.3) * 30).toFixed(2)));
-        const cls = mockReturn >= 0 ? 'positive' : 'negative';
-        const sign = mockReturn >= 0 ? '+' : '';
+        const holding = findHoldingByName(name);
+        const totalReturn = holding ? (holding.totalReturn ?? 0) : 0;
+        const cls = totalReturn >= 0 ? 'positive' : 'negative';
+        const sign = totalReturn >= 0 ? '+' : '';
         return `<p style="margin: 6px 0; display: flex; justify-content: space-between;">
             <strong>${name}</strong>
-            <span class="stat-value ${cls}">${sign}${mockReturn}%</span>
+            <span class="stat-value ${cls}">${sign}${totalReturn}%</span>
         </p>`;
     }).join('');
 
+    // 섹션 4: 보유 종목별 전일대비 등락 (holdings에서 조회)
     const assetDailyReturnHtml = assets.map(asset => {
         const name = typeof asset === 'string' ? asset : (asset.name ?? '알 수 없음');
-        const dr = (typeof asset !== 'string' && asset.dailyReturn != null)
-            ? asset.dailyReturn
-            : parseFloat(((Math.random() - 0.4) * 4).toFixed(2));
+        const holding = findHoldingByName(name);
+        const dr = holding ? (holding.dailyReturn ?? 0) : 0;
         const cls = dr >= 0 ? 'positive' : 'negative';
         const sign = dr >= 0 ? '+' : '';
         return `<p style="margin: 6px 0; display: flex; justify-content: space-between;">
@@ -790,13 +802,12 @@ function generateVillageBriefingContent(village) {
 
         <div class="briefing-section">
             <h3>📰 마을 최신 뉴스</h3>
-            ${newsHtml}
+            ${village.isCustom && village.id !== 'v3' ? '<p>AI가 다음 장전/장중 브리핑을 준비 중입니다.</p>' : newsHtml}
         </div>
 
         <div class="briefing-section">
             <h3>🤖 오늘의 AI 조언</h3>
-            <p>${villageAdvice}</p>
-            ${marketAdvice}
+            ${village.isCustom && village.id !== 'v3' ? '<p>사용자 정의 마을은 AI 조언이 제공되지 않습니다. 직접 포트폴리오를 관리하세요!</p>' : `<p>${villageAdvice}</p>${marketAdvice}`}
         </div>
     `;
 }

@@ -48,24 +48,29 @@ async function renderAnalysis() {
         updateAnalysisLoading(30, '데이터 처리 중...');
         await delay(150);
 
+        const villagesList = data.villages.filter(village => village.id === 'v1' || village.id === 'v4');
+
+        const totalAssets = villagesList.reduce((sum, v) => sum + v.totalValue, 0);
+
         // 요약 카드 업데이트
-        document.getElementById('analysisTotalAssets').textContent = data.totalAssets.toLocaleString() + '원';
+        document.getElementById('analysisTotalAssets').textContent = totalAssets.toLocaleString() + '원';
         document.getElementById('analysisTotalReturn').textContent = (data.totalReturn >= 0 ? '+' : '') + data.totalReturn + '%';
         document.getElementById('analysisVillageCount').textContent = data.villages.length + '개';
 
+        
         // 자산 변화 계산
         const assetChange = (data.totalAssets * data.monthlyChange / 100);
         document.getElementById('analysisAssetChange').textContent =
-            '+' + assetChange.toLocaleString() + '원 (+' + data.monthlyChange + '%)';
+            '+' + assetChange.toLocaleString() + '원 (+' + 12.4 + '%)';
         document.getElementById('analysisAssetChange').className =
             'analysis-card-change ' + (data.monthlyChange >= 0 ? 'positive' : 'negative');
 
         // 수익률 변화
-        document.getElementById('analysisReturnChange').textContent = '전월 대비 +2.3%p';
+        document.getElementById('analysisReturnChange').textContent = '전월 대비 +12.4%p';
         document.getElementById('analysisReturnChange').className = 'analysis-card-change positive';
 
         // 자산 개수
-        const totalAssetCount = data.villages.reduce((sum, v) => sum + v.assets.length, 0);
+        const totalAssetCount = villagesList.reduce((sum, v) => sum + v.assets.length, 0);
         document.getElementById('analysisVillageInfo').textContent = totalAssetCount + '개 자산 보유';
 
         // 투자 성향
@@ -183,6 +188,7 @@ function renderAssetTypeChart(villages) {
     // 자산 유형별 집계
     const assetTypeMap = {};
     villages.forEach(village => {
+        if( (village.isCustom && village.id !== 'v3') || village.id==='v1' || village.id==='v4' ) return;
         village.assets.forEach(asset => {
             const assetType = typeof asset === 'string' ? '기타' : asset.type;
             const assetValue = typeof asset === 'string' ? 0 : asset.value;
@@ -240,15 +246,19 @@ function renderTopPerformers(villages) {
     const container = document.getElementById('topPerformers');
     if (!container) return;
 
+    const noDuplicateVillages = villages.filter(village => 
+        village.id==='v1' || village.id==='v4' ? false : true
+    );
+
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
-    villages.forEach(village => {
+    noDuplicateVillages.forEach(village => {
         village.assets.forEach(asset => {
             if (typeof asset !== 'string') {
                 allAssets.push({
                     name: asset.name,
                     village: village.name,
-                    return: Math.random() * 30 - 5 // -5% ~ 25% 임의 수익률
+                    return: asset.totalReturn
                 });
             }
         });
@@ -270,7 +280,7 @@ function renderTopPerformers(villages) {
                     <div class="performance-village">${asset.village}</div>
                 </div>
             </div>
-            <div class="performance-return positive">+${asset.return.toFixed(2)}%</div>
+            <div class="performance-return positive">+${asset.return}%</div>
         `;
         container.appendChild(item);
     });
@@ -279,17 +289,21 @@ function renderTopPerformers(villages) {
 // 하위 종목 렌더링
 function renderBottomPerformers(villages) {
     const container = document.getElementById('bottomPerformers');
-    if (!container) return;
+    if (!container) return; 
+
+    const noDuplicateVillages = villages.filter(village => 
+        village.id==='v1' || village.id==='v4' ? false : true
+    );
 
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
-    villages.forEach(village => {
+    noDuplicateVillages.forEach(village => {
         village.assets.forEach(asset => {
             if (typeof asset !== 'string') {
                 allAssets.push({
                     name: asset.name,
                     village: village.name,
-                    return: Math.random() * 30 - 5
+                    return: asset.totalReturn
                 });
             }
         });
@@ -313,7 +327,7 @@ function renderBottomPerformers(villages) {
                     <div class="performance-village">${asset.village}</div>
                 </div>
             </div>
-            <div class="performance-return ${returnClass}">${returnSign}${asset.return.toFixed(2)}%</div>
+            <div class="performance-return ${returnClass}">${returnSign}${asset.return}%</div>
         `;
         container.appendChild(item);
     });
