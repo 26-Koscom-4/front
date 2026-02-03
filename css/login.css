@@ -23,7 +23,7 @@
 }
 
 .login-logo-image {
-    height: 150px;
+    height: 100px;
     width: auto;
     object-fit: contain;
     animation: bounce 2s infinite;

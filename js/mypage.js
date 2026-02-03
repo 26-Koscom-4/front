@@ -3,10 +3,9 @@
 async function loadMypage() {
     try {
         const data = await fetchAPI('/mypage');
-        const asset_data = await fetchAPI('/portfolio/summary?user_id=1');
 
         // 프로필 정보 로드
-        document.getElementById('userName').value = data.userProfile?.name || '김직장';
+        document.getElementById('userName').value = data.userProfile?.name || '';
         document.getElementById('userTheme').value = data.userProfile?.theme || 'light';
 
         // 설정 정보 로드
@@ -30,10 +29,10 @@ async function loadMypage() {
         applyFontSize(data.settings?.font_size || 16);
 
         // 통계 정보 계산 및 표시
-        updateStatistics(asset_data);
+        updateStatistics(data);
 
         // 자산 연동 상태 업데이트
-        updateIntegrationStatus(asset_data);
+        updateIntegrationStatus();
 
         // 투자 진단 결과 로드
         if (data.investment_test && data.investment_test.completed) {
@@ -48,7 +47,6 @@ async function loadMypage() {
 
 // 통계 정보 업데이트
 function updateStatistics(data) {
-    /*
     if (!data.villages || data.villages.length === 0) {
         document.getElementById('statTotalAssets').textContent = '0원';
         document.getElementById('statVillageCount').textContent = '0개';
@@ -56,29 +54,25 @@ function updateStatistics(data) {
         document.getElementById('statAssetCount').textContent = '0개';
         return;
     }
-    */
 
     // 총 자산
-    // const totalAssets = data.villages.reduce((sum, v) => sum + (v.totalValue || 0), 0);
-    const totalAssets = data.summary.total_assets_value;
+    const totalAssets = data.villages.reduce((sum, v) => sum + (v.totalValue || 0), 0);
     document.getElementById('statTotalAssets').textContent = totalAssets.toLocaleString() + '원';
 
     // 마을 수
-    document.getElementById('statVillageCount').textContent = data.summary.village_count + '개';
+    document.getElementById('statVillageCount').textContent = data.villages.length + '개';
 
     // 평균 수익률
-    const avgReturn = data.summary.total_profit_rate;
-    // const avgReturnFormatted = avgReturn >= 0 ? '+' + avgReturn.toFixed(1) : avgReturn.toFixed(1);
-    document.getElementById('statAvgReturn').textContent = avgReturn + '%';
+    const avgReturn = data.villages.reduce((sum, v) => sum + (v.returnRate || 0), 0) / data.villages.length;
+    const avgReturnFormatted = avgReturn >= 0 ? '+' + avgReturn.toFixed(1) : avgReturn.toFixed(1);
+    document.getElementById('statAvgReturn').textContent = avgReturnFormatted + '%';
     document.getElementById('statAvgReturn').style.color = avgReturn >= 0 ? 'var(--success)' : 'var(--danger)';
 
     // 보유 자산 수
-    let totalAssetCount = data.summary.owned_asset_count;
-    /*
+    let totalAssetCount = 0;
     data.villages.forEach(village => {
         totalAssetCount += village.assets ? village.assets.length : 0;
     });
-    */
     document.getElementById('statAssetCount').textContent = totalAssetCount + '개';
 }
 

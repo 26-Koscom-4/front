@@ -5,10 +5,6 @@ function renderRecommendationBanner(mainData = null) {
     const banner = document.getElementById('recommendationBanner');
     const hotspot = document.getElementById('recommendationHotspot');
 
-    banner.style.display = 'flex';
-    hotspot.style.display = 'block';
-
-    /*
     if (!mainData || !mainData.recommendation) {
         if (banner) banner.style.display = 'none';
         if (hotspot) hotspot.style.display = 'none';
@@ -24,7 +20,6 @@ function renderRecommendationBanner(mainData = null) {
         if (banner) banner.style.display = 'none';
         if (hotspot) hotspot.style.display = 'none';
     }
-    */
 }
 
 // 추천 페이지로 이동
@@ -64,9 +59,9 @@ function generateNewRecommendation() {
 // 메인 페이지 렌더링
 async function renderMain() {
     try {
-        const data = await fetchAPI('/dashboard/1');
+        const data = await fetchAPI('/main');
         await renderAssetChart(data);
-        renderMapBadges(data.allocation.country.items);
+        renderMapBadges(data);
         renderRecommendationBanner(data);
     } catch (error) {
         console.error('메인 페이지 로드 오류:', error);
@@ -90,7 +85,7 @@ async function renderAssetChart(mainData = null) {
     let data = mainData;
     if (!data) {
         try {
-            data = await fetchAPI('/dashboard/1');
+            data = await fetchAPI('/main');
         } catch (error) {
             console.error('메인 데이터 로드 실패:', error);
             return;
@@ -101,9 +96,11 @@ async function renderAssetChart(mainData = null) {
     const assetTypeMap = {};
     let totalAssets = 0;
 
-    data.allocation.assetType.items.forEach(village => {// 하위 호환성: asset이 문자열인 경우 처리
-            const assetType = typeof village === 'string' ? '기타' : village.label;
-            const assetValue = typeof village === 'string' ? 0 : village.marketValue;
+    data.villages.forEach(village => {
+        village.assets.forEach(asset => {
+            // 하위 호환성: asset이 문자열인 경우 처리
+            const assetType = typeof asset === 'string' ? '기타' : asset.type;
+            const assetValue = typeof asset === 'string' ? 0 : asset.value;
 
             if (!assetTypeMap[assetType]) {
                 assetTypeMap[assetType] = {
@@ -112,8 +109,9 @@ async function renderAssetChart(mainData = null) {
                 };
             }
             assetTypeMap[assetType].value += assetValue;
-            assetTypeMap[assetType].assets.push(typeof village === 'string' ? village : village.name);
+            assetTypeMap[assetType].assets.push(typeof asset === 'string' ? asset : asset.name);
             totalAssets += assetValue;
+        });
     });
 
     // 차트 데이터 준비
@@ -128,11 +126,8 @@ async function renderAssetChart(mainData = null) {
         'AI주': '🤖',
         '성장주': '🚀',
         '레버리지ETF': '⚡',
-        '기타': '📊',
-
-        '주식': '🏦',
-        '반도체주': '🛠️',
-        'ETF': '📊',
+        '한국주식': '🇰🇷',
+        '기타': '📊'
     };
 
     // 유형별 색상
@@ -144,11 +139,7 @@ async function renderAssetChart(mainData = null) {
         '성장주': 'rgba(155, 89, 182, 0.8)',
         '레버리지ETF': 'rgba(52, 152, 219, 0.8)',
         '한국주식': 'rgba(231, 76, 60, 0.8)',
-        '기타': 'rgba(149, 165, 166, 0.8)',
-
-        '주식': 'rgba(247, 147, 30, 0.8)',
-        '반도체주': 'rgba(52, 152, 219, 0.8)',
-        'ETF': 'rgba(155, 89, 182, 0.8)',
+        '기타': 'rgba(149, 165, 166, 0.8)'
     };
 
     const colors = labels.map(label => typeColors[label] || 'rgba(149, 165, 166, 0.8)');
