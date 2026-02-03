@@ -171,12 +171,8 @@ async function showVillageDetail(villageId, villageName) {
 
             <div style="margin: 20px 0; padding: 15px; background: var(--light); border-radius: 10px;">
                 <div style="margin-bottom: 8px;">
-                    <strong style="color: var(--dark);">투자 유형:</strong>
-                    <span style="color: var(--text);">${getVillageTypeText(village.type)}</span>
-                </div>
-                <div>
-                    <strong style="color: var(--dark);">투자 목표:</strong>
-                    <span style="color: var(--text);">${getVillageGoalText(village.goal)}</span>
+                    <strong style="color: var(--dark);">AI 한 줄 요약:</strong>
+                    <span style="color: var(--text);">${getVillageTypeText(village.comment)}</span>
                 </div>
             </div>
 
@@ -212,51 +208,22 @@ function goToVillageAndCloseModal(villageName) {
 // 마을 분석 차트 변수
 let villageReturnChart = null;
 
+// 현재 선택된 마을 저장
+let currentAnalysisVillage = null;
+
 // 마을로 이동 (마을 분석 페이지)
 function goToVillage(villageName) {
     const data = loadData();
     const village = data.villages.find(v => v.name === villageName);
 
     if (village) {
-        // 마을 이름 및 아이콘 업데이트
-        document.getElementById('dailyVillageName').textContent = village.name;
-        const avatar = document.querySelector('#dailyBriefingPage .ant-avatar');
-        if (avatar) {
-            avatar.textContent = village.icon;
-        }
-
-        // 마을 요약 정보 업데이트
-        document.getElementById('villageAnalysisTotalValue').textContent = village.totalValue.toLocaleString() + '원';
-        const returnRateElement = document.getElementById('villageAnalysisReturnRate');
-        returnRateElement.textContent = (village.returnRate >= 0 ? '+' : '') + village.returnRate + '%';
-        returnRateElement.style.color = village.returnRate >= 0 ? 'var(--success)' : 'var(--danger)';
-        document.getElementById('villageAnalysisAssetCount').textContent = village.assets.length + '개';
-
-        // 수익률 차트 렌더링
-        renderVillageReturnChart(village);
-
-        // 보유 자산 목록
-        const assetsContainer = document.getElementById('villageAnalysisAssets');
-        assetsContainer.innerHTML = village.assets.map(asset => {
-            const assetName = typeof asset === 'string' ? asset : asset.name;
-            const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
-            const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value.toLocaleString()}원`;
-            return `<p style="margin: 8px 0;">• <strong>${assetName}</strong>${assetType}${assetValue}</p>`;
-        }).join('');
-
-        // AI 포트폴리오 분석
-        document.getElementById('villageAnalysisAdvice').innerHTML = `
-            <p>${getVillageAdvice(village)}</p>
-            ${getMarketAdvice(village)}
-        `;
-
-        // AI 포트폴리오 리밸런싱
-        document.getElementById('villageAnalysisRebalancing').innerHTML = generateRebalancingContent(village);
+        // 현재 선택된 마을 저장
+        currentAnalysisVillage = village;
 
         // 브리핑 읽음 처리
         markBriefingAsRead(villageName);
 
-        // 마을 분석 페이지로 이동
+        // 마을 분석 페이지로 이동 (renderDaily에서 내용 렌더링)
         showPage('daily');
     } else {
         showToast('해당 마을을 찾을 수 없습니다.', 'error');
@@ -837,17 +804,69 @@ async function renderNeighbors() {
 // 데일리 브리핑 페이지 렌더링
 async function renderDaily() {
     try {
-        const data = await fetchAPI('/daily');
-        // 데일리 브리핑 데이터 표시
-        if (data.briefing_content) {
-            const contentElement = document.getElementById('dailyBriefingContent');
-            if (contentElement) {
-                contentElement.innerHTML = data.briefing_content;
-            }
+        // 현재 선택된 마을이 있으면 해당 마을 데이터 사용
+        if (currentAnalysisVillage) {
+            renderVillageAnalysisContent(currentAnalysisVillage);
+            return;
+        }
+
+        // 선택된 마을이 없으면 첫 번째 마을 표시
+        const data = loadData();
+        if (data.villages && data.villages.length > 0) {
+            currentAnalysisVillage = data.villages[0];
+            renderVillageAnalysisContent(currentAnalysisVillage);
         }
     } catch (error) {
         console.error('데일리 브리핑 로드 오류:', error);
     }
+}
+
+// 마을 분석 페이지 내용 렌더링
+function renderVillageAnalysisContent(village) {
+    if (!village) return;
+
+    // 마을 이름 및 아이콘 업데이트
+    document.getElementById('dailyVillageName').textContent = village.name;
+    const avatar = document.querySelector('#dailyBriefingPage .ant-avatar');
+    if (avatar) {
+        avatar.textContent = village.icon;
+    }
+
+    // 마을 요약 정보 업데이트
+    const totalValue = village.totalValue || 0;
+    const returnRate = village.returnRate || 0;
+    const assetsCount = village.assets ? village.assets.length : 0;
+
+    document.getElementById('villageAnalysisTotalValue').textContent = totalValue.toLocaleString() + '원';
+    const returnRateElement = document.getElementById('villageAnalysisReturnRate');
+    returnRateElement.textContent = (returnRate >= 0 ? '+' : '') + returnRate + '%';
+    returnRateElement.style.color = returnRate >= 0 ? 'var(--success)' : 'var(--danger)';
+    document.getElementById('villageAnalysisAssetCount').textContent = assetsCount + '개';
+
+    // 수익률 차트 렌더링
+    renderVillageReturnChart(village);
+
+    // 보유 자산 목록
+    const assetsContainer = document.getElementById('villageAnalysisAssets');
+    if (village.assets && village.assets.length > 0) {
+        assetsContainer.innerHTML = village.assets.map(asset => {
+            const assetName = typeof asset === 'string' ? asset : asset.name;
+            const assetType = typeof asset === 'string' ? '' : ` (${asset.type})`;
+            const assetValue = typeof asset === 'string' ? '' : ` - ${asset.value ? asset.value.toLocaleString() + '원' : ''}`;
+            return `<p style="margin: 8px 0;">• <strong>${assetName}</strong>${assetType}${assetValue}</p>`;
+        }).join('');
+    } else {
+        assetsContainer.innerHTML = '<p style="margin: 8px 0; color: var(--text-light);">보유 자산이 없습니다.</p>';
+    }
+
+    // AI 포트폴리오 분석
+    document.getElementById('villageAnalysisAdvice').innerHTML = `
+        <p>${getVillageAdvice(village)}</p>
+        ${getMarketAdvice(village)}
+    `;
+
+    // AI 포트폴리오 리밸런싱
+    document.getElementById('villageAnalysisRebalancing').innerHTML = generateRebalancingContent(village);
 }
 
 // TTS 음성 브리핑
@@ -927,8 +946,21 @@ function openAddVillageModal() {
     document.getElementById('newVillageGoal').value = '';
     document.getElementById('newVillageIcon').value = '🏘️';
 
-    // 체크박스 초기화
-    document.querySelectorAll('input[name="villageAssets"]').forEach(cb => cb.checked = false);
+    // holdings 데이터에서 종목 체크박스 목록 생성
+    const assetCheckboxList = document.getElementById('assetCheckboxList');
+    const holdings = sampleData.holdings || [];
+
+    // 중복 제거 (name 기준)
+    const uniqueHoldings = holdings.filter((holding, index, self) =>
+        index === self.findIndex(h => h.name === holding.name)
+    );
+
+    assetCheckboxList.innerHTML = uniqueHoldings.map(holding => `
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+            <input type="checkbox" name="villageAssets" value="${holding.name}" data-type="${holding.type}" style="width: 18px; height: 18px; cursor: pointer;">
+            <span>${holding.name} (${holding.type})</span>
+        </label>
+    `).join('');
 
     // 아이콘 선택 초기화
     document.querySelectorAll('.icon-select-btn').forEach(btn => btn.classList.remove('selected'));
@@ -990,9 +1022,28 @@ async function submitNewVillage(event) {
     const villageGoal = document.getElementById('newVillageGoal').value;
     const villageIcon = document.getElementById('newVillageIcon').value || '🏘️';
 
-    // 선택된 종목 가져오기 (선택사항)
-    const selectedAssets = Array.from(document.querySelectorAll('input[name="villageAssets"]:checked'))
+    // 선택된 종목 이름 가져오기
+    const selectedAssetNames = Array.from(document.querySelectorAll('input[name="villageAssets"]:checked'))
         .map(cb => cb.value);
+
+    // holdings에서 선택된 종목의 전체 데이터 가져오기
+    const holdings = sampleData.holdings || [];
+    const selectedAssets = selectedAssetNames.map(name => {
+        const holding = holdings.find(h => h.name === name);
+        if (holding) {
+            return { ...holding }; // 전체 데이터 복사
+        }
+        return { name: name, type: '기타', value: 0 };
+    });
+
+    // 총 자산 계산
+    const totalValue = selectedAssets.reduce((sum, asset) => sum + (asset.value || 0), 0);
+
+    // 포트폴리오 비중 계산 (미장마을, 국장마을의 총 자산 대비)
+    const data = loadData();
+    const baseVillages = data.villages.filter(v => v.name === '미장마을' || v.name === '국장마을');
+    const baseTotalAssets = baseVillages.reduce((sum, v) => sum + (v.totalValue || 0), 0);
+    const allocation = baseTotalAssets > 0 ? parseFloat(((totalValue / baseTotalAssets) * 100).toFixed(1)) : 0;
 
     // 노트 수집
     const notes = Array.from(document.querySelectorAll('.village-note'))
@@ -1007,11 +1058,12 @@ async function submitNewVillage(event) {
             assets: selectedAssets,
             type: villageType,
             goal: villageGoal,
-            totalValue: 0,
+            totalValue: totalValue,
             returnRate: 0,
-            allocation: 0,
+            allocation: allocation,
             notes: notes,
-            lastBriefingRead: null
+            lastBriefingRead: null,
+            comment: 'AI가 요약을 생성중입니다.'
         };
 
         const result = await fetchAPI('/villages', {

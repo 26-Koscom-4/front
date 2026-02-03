@@ -96,7 +96,20 @@ async function renderAssetChart(mainData = null) {
     const assetTypeMap = {};
     let totalAssets = 0;
 
-    data.villages.forEach(village => {
+    console.log('렌더링할 메인 데이터:', data);
+
+    const villages = data.villages.filter(village => {
+        const isAssetVillage = village.name.includes('미장') ||
+            village.name.includes('국장') ||
+            village.name.includes('장투') ||
+            village.name.includes('단타') ||
+            village.name.includes('장기') ||
+            village.name.includes('단기');
+        
+        return !isAssetVillage;
+    });
+
+    villages.forEach(village => {
         village.assets.forEach(asset => {
             // 하위 호환성: asset이 문자열인 경우 처리
             const assetType = typeof asset === 'string' ? '기타' : asset.type;
@@ -120,24 +133,24 @@ async function renderAssetChart(mainData = null) {
 
     // 유형별 아이콘 매핑
     const typeIcons = {
-        '배당ETF': '💰',
+        '배당주': '💰',
         '성장ETF': '📈',
         '기술주': '💻',
         'AI주': '🤖',
         '성장주': '🚀',
-        '레버리지ETF': '⚡',
+        '레버리지': '⚡',
         '한국주식': '🇰🇷',
         '기타': '📊'
     };
 
     // 유형별 색상
     const typeColors = {
-        '배당ETF': 'rgba(255, 107, 53, 0.8)',
-        '성장ETF': 'rgba(247, 147, 30, 0.8)',
+        '배당주': 'rgba(255, 107, 53, 0.8)',
+        '성장주': 'rgba(247, 147, 30, 0.8)',
         '기술주': 'rgba(78, 205, 196, 0.8)',
         'AI주': 'rgba(255, 210, 63, 0.8)',
         '성장주': 'rgba(155, 89, 182, 0.8)',
-        '레버리지ETF': 'rgba(52, 152, 219, 0.8)',
+        '레버리지': 'rgba(52, 152, 219, 0.8)',
         '한국주식': 'rgba(231, 76, 60, 0.8)',
         '기타': 'rgba(149, 165, 166, 0.8)'
     };

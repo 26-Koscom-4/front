@@ -42,11 +42,11 @@ async function renderAnalysis() {
         // 로딩 시작
         showAnalysisLoading();
         updateAnalysisLoading(10, '서버에 연결 중...');
-        await delay(500);
+        await delay(150);
 
         const data = await fetchAPI('/analysis');
         updateAnalysisLoading(30, '데이터 처리 중...');
-        await delay(600);
+        await delay(150);
 
         // 요약 카드 업데이트
         document.getElementById('analysisTotalAssets').textContent = data.totalAssets.toLocaleString() + '원';
@@ -74,28 +74,28 @@ async function renderAnalysis() {
         document.getElementById('analysisRiskDesc').textContent = investStyle.desc;
 
         updateAnalysisLoading(50, '차트 생성 중...');
-        await delay(600);
+        await delay(200);
 
         // 차트 렌더링
         renderVillagePerformanceChart(data.villages);
         renderAssetTypeChart(data.villages);
 
         updateAnalysisLoading(70, '성과 분석 중...');
-        await delay(500);
+        await delay(150);
 
         // 상위/하위 종목 렌더링
         renderTopPerformers(data.villages);
         renderBottomPerformers(data.villages);
 
         updateAnalysisLoading(85, '리밸런싱 추천 생성 중...');
-        await delay(500);
+        await delay(150);
 
         // 리밸런싱 추천
         renderRebalancingRecommendations(data);
 
         // 로딩 완료
         updateAnalysisLoading(100, '완료!');
-        await delay(300);
+        await delay(100);
         hideAnalysisLoading();
 
     } catch (error) {
@@ -113,7 +113,7 @@ function getInvestmentStyle() {
             return { level: typeInfo.name, desc: typeInfo.description.slice(0, 20) + '...' };
         }
     }
-    return { level: '-', desc: '마이페이지에서 진단하기' };
+    return { level: '적극투자형', desc: '고위험 고수익 투자 전략을 따릅니다.' };
 }
 
 // 마을별 수익률 차트

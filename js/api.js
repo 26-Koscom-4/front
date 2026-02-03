@@ -117,6 +117,43 @@ async function fetchAPI(endpoint, options = {}) {
             };
         }
 
+        // 데일리 브리핑
+        if (endpoint === '/village-analysis') {
+            // 배당마을 데이터 사용
+            const dividendVillage = sampleData.villages.find(v => v.name === "배당마을") || sampleData.villages[1];
+
+            const assetsHtml = dividendVillage.assets.map(asset => {
+                const returnClass = asset.dailyReturn >= 0 ? 'positive' : 'negative';
+                const returnSign = asset.dailyReturn >= 0 ? '+' : '';
+                return `<p><strong>${asset.name}</strong>: ${asset.type} - ${asset.value.toLocaleString()}원 <span class="stat-value ${returnClass}">(전일 ${returnSign}${asset.dailyReturn}%)</span></p>`;
+            }).join('');
+
+            return {
+                briefing_content: `
+                    <div class="briefing-section">
+                        <h3>🏘️ ${dividendVillage.name} 요약</h3>
+                        <p><strong>총 자산:</strong> ${dividendVillage.totalValue.toLocaleString()}원</p>
+                        <p><strong>수익률:</strong> <span class="stat-value ${dividendVillage.returnRate >= 0 ? 'positive' : 'negative'}">${dividendVillage.returnRate >= 0 ? '+' : ''}${dividendVillage.returnRate}%</span></p>
+                        <p><strong>포트폴리오 비중:</strong> ${dividendVillage.allocation}%</p>
+                    </div>
+                    <div class="briefing-section">
+                        <h3>💼 보유 자산</h3>
+                        ${assetsHtml}
+                    </div>
+                    <div class="briefing-section">
+                        <h3>📊 투자 정보</h3>
+                        <p><strong>투자 유형:</strong> 배당형</p>
+                        <p><strong>투자 목표:</strong> 배당 수익</p>
+                    </div>
+                    <div class="briefing-section">
+                        <h3>💡 오늘의 조언</h3>
+                        <p>배당주는 안정적인 현금 흐름을 제공하며 배당락일 체크가 필요합니다.</p>
+                        <p style="margin-top: 10px;">💰 배당락일 3일 전입니다. 배당 수익 예상액을 확인하세요.</p>
+                    </div>
+                `
+            };
+        }
+
         // 메인 페이지 데이터
         if (endpoint === '/main') {
             const villages = getVillagesFromStorage();
