@@ -89,8 +89,8 @@ async function renderAnalysis() {
         await delay(150);
 
         // 상위/하위 종목 렌더링
-        renderTopPerformers(data.villages);
-        renderBottomPerformers(data.villages);
+        renderTopPerformers(villagesList);
+        renderBottomPerformers(villagesList);
 
         updateAnalysisLoading(85, '리밸런싱 추천 생성 중...');
         await delay(150);
@@ -246,13 +246,9 @@ function renderTopPerformers(villages) {
     const container = document.getElementById('topPerformers');
     if (!container) return;
 
-    const noDuplicateVillages = villages.filter(village => 
-        village.id==='v1' || village.id==='v4' ? false : true
-    );
-
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
-    noDuplicateVillages.forEach(village => {
+    villages.forEach(village => {
         village.assets.forEach(asset => {
             if (typeof asset !== 'string') {
                 allAssets.push({
@@ -291,13 +287,9 @@ function renderBottomPerformers(villages) {
     const container = document.getElementById('bottomPerformers');
     if (!container) return; 
 
-    const noDuplicateVillages = villages.filter(village => 
-        village.id==='v1' || village.id==='v4' ? false : true
-    );
-
     // 모든 자산 수집 및 수익률 계산 (임의 생성)
     const allAssets = [];
-    noDuplicateVillages.forEach(village => {
+    villages.forEach(village => {
         village.assets.forEach(asset => {
             if (typeof asset !== 'string') {
                 allAssets.push({
